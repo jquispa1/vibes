@@ -10,6 +10,7 @@ import {FormattedDate} from '@ui/i18n/formatted-date';
 import {FormattedNumber} from '@ui/i18n/formatted-number';
 import {IconButton} from '@ui/buttons/icon-button';
 import {EditIcon} from '@ui/icons/material/Edit';
+import {OpenInNewIcon} from '@ui/icons/material/OpenInNew';
 import {BlogPost} from '@app/blog/requests/use-blog-posts';
 import articlesSvg from '@common/admin/custom-pages/articles.svg';
 import {BlogDatatablePageFilters} from '@app/admin/blog-datatable-page/blog-datatable-page-filters';
@@ -57,16 +58,27 @@ const columns: ColumnConfig<BlogPost & {author?: {name: string}}>[] = [
     hideHeader: true,
     align: 'end',
     visibleInMode: 'all',
-    width: 'w-42 flex-shrink-0',
+    width: 'w-84 flex-shrink-0',
     body: post => (
-      <IconButton
-        size="md"
-        className="text-muted"
-        to={`${post.slug}/edit`}
-        elementType={Link}
-      >
-        <EditIcon />
-      </IconButton>
+      <div className="flex items-center gap-4">
+        <IconButton
+          size="md"
+          className="text-muted"
+          to={`/blog/${post.slug}`}
+          elementType={Link}
+          target="_blank"
+        >
+          <OpenInNewIcon />
+        </IconButton>
+        <IconButton
+          size="md"
+          className="text-muted"
+          to={`${post.slug}/edit`}
+          elementType={Link}
+        >
+          <EditIcon />
+        </IconButton>
+      </div>
     ),
   },
 ];
