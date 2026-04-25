@@ -1,0 +1,179 @@
+import {Outlet} from 'react-router';
+import {PlayerContext} from '@common/player/player-context';
+import {playerStoreOptions} from '@app/web-player/state/player-store-options';
+import React, {Fragment, useEffect, useRef} from 'react';
+import {useSettings} from '@ui/settings/use-settings';
+import {Sidenav} from '@app/web-player/layout/sidenav';
+import {QueueSidenav} from '@app/web-player/layout/queue/queue-sidenav';
+import clsx from 'clsx';
+import {useMediaQuery} from '@ui/utils/hooks/use-media-query';
+import {usePlayerStore} from '@common/player/hooks/use-player-store';
+import {usePlayerActions} from '@common/player/hooks/use-player-actions';
+import type {PlayerState} from '@common/player/state/player-state';
+import {MobilePlayerControls} from '@app/web-player/player-controls/mobile-player-controls';
+import {DesktopPlayerControls} from '@app/web-player/player-controls/desktop-player-controls';
+import {PlayerOverlay} from '@app/web-player/overlay/player-overlay';
+import {PlayerNavbar} from '@app/web-player/layout/player-navbar';
+import {DashboardLayout} from '@common/ui/dashboard-layout/dashboard-layout';
+import {DashboardSidenav} from '@common/ui/dashboard-layout/dashboard-sidenav';
+import {DashboardContent} from '@common/ui/dashboard-layout/dashboard-content';
+import {useIsTabletMediaQuery} from '@ui/utils/hooks/is-tablet-media-query';
+
+export function WebPlayerLayout() {
+  const {player} = useSettings();
+  const isMobile = useIsTabletMediaQuery();
+
+  const content = isMobile ? (
+    <Fragment>
+      <Main className="h-screen" />
+      <MobilePlayerControls />
+    </Fragment>
+  ) : (
+    <DashboardLayout
+      name="web-player"
+      initialRightSidenavStatus={player?.hide_queue ? 'closed' : 'open'}
+    >
+      <PlayerNavbar />
+      <DashboardSidenav position="left" display="block">
+        <Sidenav />
+      </DashboardSidenav>
+      <DashboardContent>
+        <Main />
+      </DashboardContent>
+      <RightSidenav />
+      <DesktopPlayerControls />
+    </DashboardLayout>
+  );
+
+  return (
+    <PlayerContext id="web-player" options={playerStoreOptions}>
+      <AndroidMediaBridge />
+      {content}
+      <PlayerOverlay />
+    </PlayerContext>
+  );
+}
+
+function AndroidMediaBridge() {
+  const actions = usePlayerActions();
+  const lastProgressSentRef = useRef<number>(-1);
+  const playerStateRef = useRef<PlayerState | null>(null);
+  const lastCuedMediaIdRef = useRef<string | number | null>(null);
+  const metadataSentRef = useRef<string | number | null>(null);
+
+  useEffect(() => {
+    const w = window as any;
+    w.VibeTurnPlayer = {
+      play: () => actions.play(),
+      pause: () => actions.pause(),
+      togglePlayPause: () => {
+        const state = actions.getState();
+        if (state.isPlaying) {
+          actions.pause();
+        } else {
+          actions.play();
+        }
+      },
+      playNextTrack: () => actions.playNext(),
+      playPreviousTrack: () => actions.playPrevious(),
+    };
+
+    return () => {
+      if ((window as any).VibeTurnPlayer === w.VibeTurnPlayer) {
+        delete (window as any).VibeTurnPlayer;
+      }
+    };
+  }, [actions]);
+
+  useEffect(() => {
+    const unsubscribe = actions.subscribe({
+
+      cued: () => {
+        const state = actions.getState();
+        if (!state) return;
+        const android = (window as any).Android;
+        console.log('Android:', android);
+        //if (!android || typeof android.notifySongChanged !== 'function') return;
+
+        const media = state.cuedMedia;
+        if (!media) return;
+        if (lastCuedMediaIdRef.current === media.id) return;
+        lastCuedMediaIdRef.current = media.id;
+
+        
+      },
+      play: () => {
+        console.log('play');
+        const android = (window as any).Android;
+        if (!android || typeof android.notifyPlaybackResumed !== 'function') return;
+        try {
+          android.notifyPlaybackResumed();
+        } catch (e) {}
+      },
+      pause: () => {
+        const android = (window as any).Android;
+        if (!android || typeof android.notifyPlaybackPaused !== 'function') return;
+        try {
+          android.notifyPlaybackPaused();
+        } catch (e) {}
+      },
+      progress: ({ currentTime }: { currentTime: number }) => {
+        const state = actions.getState();
+        if (!state) return;
+        const android = (window as any).Android;
+        if (!android || typeof android.updateSongProgress !== 'function') return;
+
+        const current = Math.floor(currentTime || 0);
+        if (current === lastProgressSentRef.current) return;
+        lastProgressSentRef.current = current;
+
+        const total = Math.floor(state.mediaDuration || 0);
+        
+        try {
+          android.updateSongProgress(current, total);
+        } catch (e) {}
+      },
+    });
+    return () => unsubscribe?.();
+  }, [actions]);
+
+  return null;
+}
+
+interface MainProps {
+  className?: string;
+}
+function Main({className}: MainProps) {
+  return (
+    <main
+      className={clsx(
+        'relative overflow-x-hidden stable-scrollbar',
+        className,
+        // mobile player controls are fixed to bottom of screen,
+        // make sure we can scroll to the bottom of the page
+        'pb-124 md:pb-0',
+      )}
+    >
+      <div className="web-player-container mx-auto min-h-full p-16 @container md:p-30">
+        <Outlet />
+      </div>
+    </main>
+  );
+}
+
+function RightSidenav() {
+  const isOverlay = useMediaQuery('(max-width: 1280px)');
+  const hideQueue = usePlayerStore((s: any) => !s.shuffledQueue.length);
+  return (
+    <DashboardSidenav
+      position="right"
+      size="w-256"
+      mode={isOverlay ? 'overlay' : undefined}
+      overlayPosition="absolute"
+      display="block"
+      forceClosed={hideQueue}
+    >
+      <QueueSidenav />
+    </DashboardSidenav>
+  );
+}
