@@ -179,9 +179,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     Route::post('blog-posts', [BlogPostController::class, 'store']);
     Route::put('blog-posts/{blogPost}', [BlogPostController::class, 'update']);
     Route::delete('blog-posts/{ids}', [BlogPostController::class, 'destroy']);
+
+    // BLOG (dentro del grupo para que optionalAuth reconozca al admin)
+    Route::get('blog-posts', [BlogPostController::class, 'index']);
+    Route::get('blog-posts/{blogPost}', [BlogPostController::class, 'show']);
 });
-
-Route::get('blog-posts', [BlogPostController::class, 'index']);
-Route::get('blog-posts/{blogPost}', [BlogPostController::class, 'show']);
-
-
