@@ -655,6 +655,22 @@ return [
                         'permissions' => ['custom_pages.update'],
                     ],
                     [
+                        'label' => 'Blog',
+                        'action' => '/admin/blog',
+                        'type' => 'route',
+                        'id' => 'blognav1',
+                        'icon' => [
+                            [
+                                'tag' => 'path',
+                                'attr' => [
+                                    'd' =>
+                                        'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM8 7h8v2H8V7zm0 4h8v2H8v-2zm0 4h5v2H8v-2z',
+                                ],
+                            ],
+                        ],
+                        'permissions' => ['admin.access'],
+                    ],
+                    [
                         'label' => 'Tags',
                         'action' => '/admin/tags',
                         'type' => 'route',

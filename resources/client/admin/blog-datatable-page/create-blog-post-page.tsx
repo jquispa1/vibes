@@ -10,6 +10,9 @@ import {FullPageLoader} from '@ui/progress/full-page-loader';
 import {CreateBlogPostPayload, useCreateBlogPost} from './requests/use-create-blog-post';
 import {FormImageSelector} from '@common/uploads/components/image-selector';
 import {Trans} from '@ui/i18n/trans';
+import {FormTextField} from '@ui/forms/input-field/text-field/text-field';
+import {FormSelect} from '@ui/forms/select/select';
+import {Item} from '@ui/forms/listbox/item';
 
 const ArticleBodyEditor = React.lazy(
   () => import('@common/article-editor/article-body-editor'),
@@ -20,6 +23,7 @@ export function CreateBlogPostPage() {
   const createPost = useCreateBlogPost();
   const form = useForm<CreateBlogPostPayload>({
     defaultValues: {
+      title: '',
       status: 'draft',
     },
   });
@@ -63,45 +67,53 @@ export function CreateBlogPostPage() {
                 }
               />
               <div className="mx-20">
-                <div className="mx-auto flex max-w-3xl flex-col gap-6">
+                <div className="mx-auto max-w-3xl">
                   <ArticleEditorTitle />
-                  <input
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3"
-                    placeholder="Slug"
-                    {...form.register('slug')}
+                  <FormTextField
+                    className="mb-24"
+                    name="slug"
+                    label={<Trans message="Slug" />}
                   />
                   <FormImageSelector
+                    className="mb-24"
                     name="featured_image"
                     diskPrefix="blog_media"
                     variant="input"
                     label={<Trans message="Featured image" />}
                   />
-                  <textarea
-                    className="min-h-28 w-full rounded-xl border border-border bg-background px-4 py-3"
-                    placeholder="Excerpt"
-                    {...form.register('excerpt')}
+                  <FormTextField
+                    className="mb-24"
+                    name="excerpt"
+                    label={<Trans message="Excerpt" />}
+                    inputElementType="textarea"
+                    rows={4}
                   />
-                  <input
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3"
-                    placeholder="Meta title"
-                    {...form.register('meta_title')}
+                  <FormTextField
+                    className="mb-24"
+                    name="meta_title"
+                    label={<Trans message="Meta title" />}
                   />
-                  <textarea
-                    className="min-h-28 w-full rounded-xl border border-border bg-background px-4 py-3"
-                    placeholder="Meta description"
-                    {...form.register('meta_description')}
+                  <FormTextField
+                    className="mb-24"
+                    name="meta_description"
+                    label={<Trans message="Meta description" />}
+                    inputElementType="textarea"
+                    rows={4}
                   />
-                  <div className="w-full rounded-xl border border-border bg-background px-4 py-3">
-                    <label className="mb-2 block text-sm font-medium">Status</label>
-                    <select
-                      className="w-full bg-transparent outline-none"
-                      {...form.register('status')}
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="published">Published</option>
-                    </select>
-                  </div>
-                  {content}
+                  <FormSelect
+                    className="mb-24"
+                    name="status"
+                    selectionMode="single"
+                    label={<Trans message="Status" />}
+                  >
+                    <Item value="draft">
+                      <Trans message="Draft" />
+                    </Item>
+                    <Item value="published">
+                      <Trans message="Published" />
+                    </Item>
+                  </FormSelect>
+                  <div className="prose dark:prose-invert">{content}</div>
                 </div>
               </div>
             </FormProvider>
