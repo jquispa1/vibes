@@ -110,4 +110,17 @@ export const appAdminRoutes: RouteObject[] = [
     path: 'comments',
     lazy: () => lazyAdminRoute('CommentsDatatablePage'),
   },
+  // Blog
+  {
+    path: 'blog',
+    lazy: () => lazyAdminRoute('BlogDatatablePage'),
+  },
+  {
+    path: 'blog/new',
+    lazy: () => lazyAdminRoute('CreateBlogPostPage'),
+  },
+  {
+    path: 'blog/:slug/edit',
+    lazy: () => lazyAdminRoute('EditBlogPostPage'),
+  },
 ];

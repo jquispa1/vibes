@@ -32,3 +32,6 @@ export {LandingPageSectionPrimaryFeatures} from '@app/admin/appearance/sections/
 export {LandingPageSectionActionButtons} from '@app/admin/appearance/sections/landing-page-section/landing-page-section-action-buttons';
 export {LandingPageSectionGeneral} from '@app/admin/appearance/sections/landing-page-section/landing-page-section-general';
 export {LandingPageSecondaryFeatures} from '@app/admin/appearance/sections/landing-page-section/landing-page-section-secondary-features';
+export {BlogDatatablePage} from '@app/admin/blog-datatable-page/blog-datatable-page';
+export {CreateBlogPostPage} from '@app/admin/blog-datatable-page/create-blog-post-page';
+export {EditBlogPostPage} from '@app/admin/blog-datatable-page/edit-blog-post-page';

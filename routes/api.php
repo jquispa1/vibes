@@ -22,6 +22,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ImportMediaController;
 use App\Http\Controllers\InsightsReportController;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\LyricsController;
 use App\Http\Controllers\MinutesLimitController;
 use App\Http\Controllers\PlayerTracksController;
@@ -173,6 +174,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
 
     // LANDING
     Route::get('landing/artists', [LandingPageController::class, 'artists']);
+
+    // BLOG ADMIN
+    Route::post('blog-posts', [BlogPostController::class, 'store']);
+    Route::put('blog-posts/{blogPost}', [BlogPostController::class, 'update']);
+    Route::delete('blog-posts/{ids}', [BlogPostController::class, 'destroy']);
 });
+
+Route::get('blog-posts', [BlogPostController::class, 'index']);
+Route::get('blog-posts/{blogPost}', [BlogPostController::class, 'show']);
 
 

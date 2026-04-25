@@ -4,7 +4,24 @@ import {CustomPageLayout} from '@common/custom-page/custom-page-layout';
 import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
 import React from 'react';
 
+const lazyRoute = async (
+  cmp: keyof typeof import('@app/blog/routes/blog-routes.lazy'),
+) => {
+  const exports = await import('@app/blog/routes/blog-routes.lazy');
+  return {
+    Component: exports[cmp],
+  };
+};
+
 export const commonRoutes: RouteObject[] = [
+  {
+    path: 'blog',
+    lazy: () => lazyRoute('BlogPage'),
+  },
+  {
+    path: 'blog/:slug',
+    lazy: () => lazyRoute('BlogPostPage'),
+  },
   {
     path: 'contact',
     element: <ContactUsPage />,
