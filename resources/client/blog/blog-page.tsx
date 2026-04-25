@@ -1,16 +1,31 @@
 import {Link} from 'react-router';
 import {PageStatus} from '@common/http/page-status';
 import {useBlogPosts} from './requests/use-blog-posts';
+import {Navbar} from '@common/ui/navigation/navbar/navbar';
+import {Footer} from '@common/ui/footer/footer';
 
 export function BlogPage() {
   const query = useBlogPosts();
 
-  if (!query.data) {
-    return <PageStatus query={query} loaderIsScreen={false} />;
-  }
+  return (
+    <div className="flex min-h-screen flex-col bg">
+      <Navbar
+        menuPosition="custom-page-navbar"
+        className="sticky top-0 flex-shrink-0"
+      />
+      <div className="flex-auto">
+        {!query.data ? (
+          <PageStatus query={query} loaderClassName="mt-80" />
+        ) : (
+          <BlogPageContent posts={query.data.pagination.data} />
+        )}
+      </div>
+      <Footer className="mx-14 md:mx-40" />
+    </div>
+  );
+}
 
-  const posts = query.data.pagination.data;
-
+function BlogPageContent({posts}: {posts: any[]}) {
   return (
     <div className="mx-auto min-h-[calc(100vh-6rem)] max-w-5xl px-6 py-16">
       <div className="mb-12 max-w-3xl">

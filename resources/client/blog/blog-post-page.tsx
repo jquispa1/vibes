@@ -1,16 +1,31 @@
 import {Link} from 'react-router';
 import {PageStatus} from '@common/http/page-status';
 import {useBlogPost} from './requests/use-blog-post';
+import {Navbar} from '@common/ui/navigation/navbar/navbar';
+import {Footer} from '@common/ui/footer/footer';
 
 export function BlogPostPage() {
   const query = useBlogPost();
 
-  if (!query.data) {
-    return <PageStatus query={query} loaderIsScreen={false} />;
-  }
+  return (
+    <div className="flex min-h-screen flex-col bg">
+      <Navbar
+        menuPosition="custom-page-navbar"
+        className="sticky top-0 flex-shrink-0"
+      />
+      <div className="flex-auto">
+        {!query.data ? (
+          <PageStatus query={query} loaderClassName="mt-80" />
+        ) : (
+          <BlogPostContent post={query.data.blogPost} />
+        )}
+      </div>
+      <Footer className="mx-14 md:mx-40" />
+    </div>
+  );
+}
 
-  const post = query.data.blogPost;
-
+function BlogPostContent({post}: {post: any}) {
   return (
     <article className="mx-auto min-h-[calc(100vh-6rem)] max-w-4xl px-6 py-16">
       <div className="mb-10 flex items-center justify-between gap-4">
@@ -43,7 +58,7 @@ export function BlogPostPage() {
       ) : null}
 
       <div
-        className="prose prose-neutral max-w-none prose-headings:scroll-mt-24 prose-a:text-primary prose-img:rounded-2xl"
+        className="prose prose-neutral max-w-none prose-headings:scroll-mt-24 prose-a:text-primary prose-img:rounded-2xl dark:prose-invert"
         dangerouslySetInnerHTML={{__html: post.content}}
       />
     </article>
