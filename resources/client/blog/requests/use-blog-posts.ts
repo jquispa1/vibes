@@ -41,6 +41,6 @@ export function useBlogPosts() {
 
 function fetchBlogPosts() {
   return apiClient
-    .get<BlogPostsResponse>('blog-posts')
+    .get<BlogPostsResponse>('blog-posts', {params: {publishedOnly: true}})
     .then(response => response.data);
 }
