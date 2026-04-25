@@ -24,11 +24,7 @@ export function EditBlogPostPage() {
 
   return query.data ? (
     <Fragment>
-      <PageMetaTags
-        query={query}
-        title={query.data.blogPost.meta_title || query.data.blogPost.title}
-        description={query.data.blogPost.meta_description || query.data.blogPost.excerpt || ''}
-      />
+      <PageMetaTags query={query} />
       <PageContent />
     </Fragment>
   ) : (
