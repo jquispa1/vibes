@@ -68,7 +68,7 @@ function PageContent() {
         content,
       },
       {
-        onSuccess: () => navigate('../', {relative: 'path'}),
+        onSuccess: () => navigate('/admin/blog'),
       },
     );
   };

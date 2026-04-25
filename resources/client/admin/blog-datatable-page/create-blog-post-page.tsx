@@ -44,7 +44,7 @@ export function CreateBlogPostPage() {
         content,
       },
       {
-        onSuccess: () => navigate('../', {relative: 'path'}),
+        onSuccess: () => navigate('/admin/blog'),
       },
     );
   };
