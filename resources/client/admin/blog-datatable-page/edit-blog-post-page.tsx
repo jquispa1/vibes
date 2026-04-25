@@ -17,6 +17,14 @@ import {Trans} from '@ui/i18n/trans';
 import {FormTextField} from '@ui/forms/input-field/text-field/text-field';
 import {FormSelect} from '@ui/forms/select/select';
 import {Item} from '@ui/forms/listbox/item';
+import {DialogTrigger} from '@ui/overlays/dialog/dialog-trigger';
+import {Dialog} from '@ui/overlays/dialog/dialog';
+import {DialogHeader} from '@ui/overlays/dialog/dialog-header';
+import {DialogBody} from '@ui/overlays/dialog/dialog-body';
+import {DialogFooter} from '@ui/overlays/dialog/dialog-footer';
+import {useDialogContext} from '@ui/overlays/dialog/dialog-context';
+import {SettingsIcon} from '@ui/icons/material/Settings';
+import {IconButton} from '@ui/buttons/icon-button';
 
 const ArticleBodyEditor = React.lazy(
   () => import('@common/article-editor/article-body-editor'),
@@ -78,66 +86,25 @@ function PageContent() {
                 isLoading={updatePost.isPending}
                 onSave={handleSave}
                 saveButton={
-                  form.watch('slug') ? (
-                    <Button
-                      elementType={Link}
-                      to={`/blog/${form.watch('slug')}`}
-                      target="_blank"
-                      variant="outline"
-                      size="sm"
-                    >
-                      Preview
-                    </Button>
-                  ) : undefined
+                  <>
+                    <BlogPostSettingsDialog />
+                    {form.watch('slug') ? (
+                      <Button
+                        elementType={Link}
+                        to={`/blog/${form.watch('slug')}`}
+                        target="_blank"
+                        variant="outline"
+                        size="sm"
+                      >
+                        Preview
+                      </Button>
+                    ) : undefined}
+                  </>
                 }
               />
               <div className="mx-20">
                 <div className="mx-auto max-w-3xl">
                   <ArticleEditorTitle />
-                  <FormTextField
-                    className="mb-24"
-                    name="slug"
-                    label={<Trans message="Slug" />}
-                  />
-                  <FormImageSelector
-                    className="mb-24"
-                    name="featured_image"
-                    diskPrefix="blog_media"
-                    variant="input"
-                    label={<Trans message="Featured image" />}
-                  />
-                  <FormTextField
-                    className="mb-24"
-                    name="excerpt"
-                    label={<Trans message="Excerpt" />}
-                    inputElementType="textarea"
-                    rows={4}
-                  />
-                  <FormTextField
-                    className="mb-24"
-                    name="meta_title"
-                    label={<Trans message="Meta title" />}
-                  />
-                  <FormTextField
-                    className="mb-24"
-                    name="meta_description"
-                    label={<Trans message="Meta description" />}
-                    inputElementType="textarea"
-                    rows={4}
-                  />
-                  <FormSelect
-                    className="mb-24"
-                    name="status"
-                    selectionMode="single"
-                    label={<Trans message="Status" />}
-                  >
-                    <Item value="draft">
-                      <Trans message="Draft" />
-                    </Item>
-                    <Item value="published">
-                      <Trans message="Published" />
-                    </Item>
-                  </FormSelect>
                   <div className="prose dark:prose-invert">{content}</div>
                 </div>
               </div>
@@ -146,5 +113,82 @@ function PageContent() {
         )}
       </ArticleBodyEditor>
     </Suspense>
+  );
+}
+
+function BlogPostSettingsDialog() {
+  return (
+    <DialogTrigger type="modal">
+      <IconButton variant="outline" size="sm">
+        <SettingsIcon />
+      </IconButton>
+      <BlogPostSettingsDialogContent />
+    </DialogTrigger>
+  );
+}
+
+function BlogPostSettingsDialogContent() {
+  const {close} = useDialogContext();
+  return (
+    <Dialog size="lg">
+      <DialogHeader>
+        <Trans message="Post settings" />
+      </DialogHeader>
+      <DialogBody>
+        <FormTextField
+          className="mb-24"
+          name="slug"
+          label={<Trans message="Slug" />}
+        />
+        <FormImageSelector
+          className="mb-24"
+          name="featured_image"
+          diskPrefix="blog_media"
+          variant="input"
+          label={<Trans message="Featured image" />}
+        />
+        <FormTextField
+          className="mb-24"
+          name="excerpt"
+          label={<Trans message="Excerpt" />}
+          inputElementType="textarea"
+          rows={4}
+        />
+        <FormTextField
+          className="mb-24"
+          name="meta_title"
+          label={<Trans message="Meta title" />}
+        />
+        <FormTextField
+          className="mb-24"
+          name="meta_description"
+          label={<Trans message="Meta description" />}
+          inputElementType="textarea"
+          rows={4}
+        />
+        <FormSelect
+          className="mb-24"
+          name="status"
+          selectionMode="single"
+          label={<Trans message="Status" />}
+        >
+          <Item value="draft">
+            <Trans message="Draft" />
+          </Item>
+          <Item value="published">
+            <Trans message="Published" />
+          </Item>
+        </FormSelect>
+      </DialogBody>
+      <DialogFooter>
+        <Button
+          variant="flat"
+          color="primary"
+          onClick={() => close()}
+        >
+          <Trans message="Done" />
+        </Button>
+      </DialogFooter>
+    </Dialog>
   );
 }
