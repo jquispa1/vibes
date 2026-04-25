@@ -19,7 +19,10 @@ class BlogPostController extends BaseController
     {
         $query = $this->blogPost->newQuery()->with('author');
 
-        if ($this->request->user()?->hasPermission('admin.access')) {
+        if (
+            $this->request->user()?->hasPermission('admin.access') &&
+            !$this->request->boolean('publishedOnly')
+        ) {
             $pagination = app(PaginateBlogPosts::class)->execute(
                 $this->request->all(),
                 $query,

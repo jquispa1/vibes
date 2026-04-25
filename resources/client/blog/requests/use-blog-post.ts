@@ -1,25 +1,46 @@
 import {useQuery} from '@tanstack/react-query';
 import {apiClient} from '@common/http/query-client';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
-import {useParams} from 'react-router';
-import {BlogPost} from './use-blog-posts';
 
-export interface BlogPostResponse extends BackendResponse {
-  blogPost: BlogPost;
+export interface BlogAuthor {
+  id: number;
+  name: string;
 }
 
-export function useBlogPost() {
-  const {slug} = useParams();
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  content: string;
+  featured_image?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  published_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  status: 'draft' | 'published';
+  author?: BlogAuthor | null;
+}
 
+export interface BlogPostsResponse extends BackendResponse {
+  pagination: {
+    data: BlogPost[];
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
+}
+
+export function useBlogPosts() {
   return useQuery({
-    queryKey: ['blogPosts', slug],
-    queryFn: () => fetchBlogPost(slug!),
-    enabled: !!slug,
+    queryKey: ['blogPosts'],
+    queryFn: () => fetchBlogPosts(),
   });
 }
 
-function fetchBlogPost(slug: string) {
+function fetchBlogPosts() {
   return apiClient
-    .get<BlogPostResponse>(`blog-posts/${slug}`)
+    .get<BlogPostsResponse>('blog-posts', {params: {publishedOnly: true}})
     .then(response => response.data);
 }
