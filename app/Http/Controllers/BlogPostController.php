@@ -34,13 +34,21 @@ class BlogPostController extends BaseController
                 ->paginate($this->request->integer('perPage', 15));
         }
 
-        return $this->success(['pagination' => $pagination]);
+        return $this->renderClientOrApi([
+            'pageName' => 'blog-page',
+            'data' => [
+                'pagination' => $pagination,
+            ],
+        ]);
     }
 
     public function show(BlogPost $blogPost)
     {
-        return $this->success([
-            'blogPost' => $blogPost->load('author'),
+        return $this->renderClientOrApi([
+            'pageName' => 'blog-post-page',
+            'data' => [
+                'blogPost' => $blogPost->load('author'),
+            ],
         ]);
     }
 

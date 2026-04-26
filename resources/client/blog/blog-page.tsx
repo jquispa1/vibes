@@ -3,26 +3,14 @@ import {PageStatus} from '@common/http/page-status';
 import {useBlogPosts, BlogPost} from './requests/use-blog-posts';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {Footer} from '@common/ui/footer/footer';
-import {Helmet} from '@common/seo/helmet';
+import {PageMetaTags} from '@common/http/page-meta-tags';
 
 export function BlogPage() {
   const query = useBlogPosts();
 
   return (
     <div className="flex min-h-screen flex-col bg">
-      <Helmet>
-        <title>Blog - Vibeturn</title>
-        <meta
-          name="description"
-          content="Novedades, guías y artículos sobre la plataforma Vibeturn."
-        />
-        <meta property="og:title" content="Blog - Vibeturn" />
-        <meta
-          property="og:description"
-          content="Novedades, guías y artículos sobre la plataforma Vibeturn."
-        />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <PageMetaTags query={query} />
       <Navbar
         menuPosition="custom-page-navbar"
         className="sticky top-0 flex-shrink-0"

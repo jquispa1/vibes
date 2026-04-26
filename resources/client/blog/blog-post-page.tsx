@@ -5,7 +5,7 @@ import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {Footer} from '@common/ui/footer/footer';
 import {useEffect, useRef} from 'react';
 import {highlightAllCode} from '@common/text-editor/highlight/highlight-code';
-import {Helmet} from '@common/seo/helmet';
+import {PageMetaTags} from '@common/http/page-meta-tags';
 
 export function BlogPostPage() {
   const query = useBlogPost();
@@ -13,33 +13,7 @@ export function BlogPostPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg">
-      {post && (
-        <Helmet>
-          <title>{post.meta_title || post.title} - Vibeturn</title>
-          <meta
-            name="description"
-            content={post.meta_description || post.excerpt || ''}
-          />
-          <meta
-            property="og:title"
-            content={post.meta_title || post.title}
-          />
-          <meta
-            property="og:description"
-            content={post.meta_description || post.excerpt || ''}
-          />
-          <meta property="og:type" content="article" />
-          {post.featured_image && (
-            <meta property="og:image" content={post.featured_image} />
-          )}
-          {post.published_at && (
-            <meta
-              property="article:published_time"
-              content={post.published_at}
-            />
-          )}
-        </Helmet>
-      )}
+      <PageMetaTags query={query} />
       <Navbar
         menuPosition="custom-page-navbar"
         className="sticky top-0 flex-shrink-0"

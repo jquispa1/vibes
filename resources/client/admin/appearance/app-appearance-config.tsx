@@ -109,6 +109,14 @@ export const AppAppearanceConfig: IAppearanceConfig = {
             key: 'search-page',
             label: message('Search page'),
           },
+          {
+            key: 'blog-page',
+            label: message('Blog page'),
+          },
+          {
+            key: 'blog-post-page',
+            label: message('Blog post page'),
+          },
         ],
       } as SeoSettingsSectionConfig,
     },
