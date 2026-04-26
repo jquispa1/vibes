@@ -2,6 +2,7 @@
 
 use App\Models\Album;
 use App\Models\Artist;
+use App\Models\BlogPost;
 use App\Models\Channel;
 use App\Models\Genre;
 use App\Models\Playlist;
@@ -35,12 +36,15 @@ class SitemapGenerator extends BaseSitemapGenerator
                 "email",
                 "updated_at",
             ]),
+            app(BlogPost::class)
+                ->published()
+                ->select(["id", "title", "slug", "updated_at"]),
         ];
     }
 
     protected function getAppStaticUrls(): array
     {
-        return Channel::all()
+        $urls = Channel::all()
             ->map(function (Channel $channel) {
                 return [
                     "path" => app(UrlGenerator::class)->channel(
@@ -50,5 +54,12 @@ class SitemapGenerator extends BaseSitemapGenerator
                 ];
             })
             ->toArray();
+
+        $urls[] = [
+            "path" => "blog",
+            "updated_at" => now()->toDateTimeString(),
+        ];
+
+        return $urls;
     }
 }

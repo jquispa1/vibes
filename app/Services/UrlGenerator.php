@@ -88,6 +88,11 @@ class UrlGenerator extends BaseUrlGenerator
         return url("search/$name");
     }
 
+    public function blogPost($blogPost)
+    {
+        return url("blog/{$blogPost['slug']}");
+    }
+
     public function image($path)
     {
         if ($path && !str_starts_with($path, 'http')) {
