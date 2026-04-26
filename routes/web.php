@@ -14,6 +14,7 @@
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\AppHomeController;
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\FallbackRouteController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\Search\SearchController;
@@ -37,6 +38,9 @@ Route::get('search/{query}', [SearchController::class, 'index']);
 Route::get('search/{query}/{tab}', [SearchController::class, 'index']);
 Route::get('channels/{channel}', [ChannelController::class, 'show']);
 Route::get('channel/{channel}', [ChannelController::class, 'show']);
+
+Route::get('blog', [BlogPostController::class, 'index']);
+Route::get('blog/{blogPost}', [BlogPostController::class, 'show']);
 
 Route::get('contact', [HomeController::class, 'render']);
 Route::get('login', [HomeController::class, 'render'])->name('login');
@@ -68,4 +72,3 @@ Route::get('/ads.txt', function () {
 Route::get('/ads.txt', function () {
     return redirect('/public/ads.txt');
 });
-
