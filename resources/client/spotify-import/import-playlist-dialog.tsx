@@ -6,16 +6,18 @@ import {DialogHeader} from '@ui/overlays/dialog/dialog-header';
 import {useForm} from 'react-hook-form';
 import {Trans} from '@ui/i18n/trans';
 import {Button} from '@ui/buttons/button';
-import {Input} from '@ui/inputs/input';
-import {useImportPlaylist} from './requests/use-import-playlist';
-import {useState} from 'react';
-import {useEffect} from 'react';
+import {Input} from '@ui/forms/input-field/input';
+import {
+  ImportPlaylistResponse,
+  useImportPlaylist,
+} from './requests/use-import-playlist';
+import {useEffect, useState} from 'react';
 
 export function ImportPlaylistDialog() {
   const {close, formId} = useDialogContext();
   const form = useForm<{url: string}>({defaultValues: {url: ''}});
   const importMutation = useImportPlaylist();
-  const [result, setResult] = useState<null | {attached?: number; total?: number}>(null);
+  const [result, setResult] = useState<ImportPlaylistResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function ImportPlaylistDialog() {
           setResult(null);
           importMutation.mutate(values, {
             onSuccess: (data) => {
-              setResult({attached: data.attached, total: data.total});
+              setResult(data);
             },
             onError: (err: any) => {
               setError(err?.response?.data?.message || err?.message || 'Import failed');
@@ -46,12 +48,17 @@ export function ImportPlaylistDialog() {
           <div className="space-y-12">
             <div>
               <label className="mb-8 block text-sm font-medium text-muted"><Trans message="Playlist URL or ID (must be public)" /></label>
-              <Input disabled={importMutation.isLoading} {...form.register('url', {required: true})} placeholder="https://open.spotify.com/playlist/..." />
+              <Input disabled={importMutation.isPending}>
+                <input
+                  {...form.register('url', {required: true})}
+                  placeholder="https://open.spotify.com/playlist/..."
+                />
+              </Input>
               <p className="mt-8 text-sm text-muted">
                 <Trans message="Example: https://open.spotify.com/playlist/{id}" />
               </p>
 
-              {importMutation.isLoading && (
+              {importMutation.isPending && (
                 <div className="mt-12">
                   <div className="h-2 w-full overflow-hidden rounded bg-gray-200">
                     <div className="h-2 w-1/3 animate-pulse rounded bg-primary" />
@@ -86,8 +93,8 @@ export function ImportPlaylistDialog() {
         <Button onClick={() => close()}>
           <Trans message="Cancel" />
         </Button>
-        <Button form={formId} disabled={importMutation.isLoading} variant="flat" color="primary" type="submit">
-          {importMutation.isLoading ? <Trans message="Importing..." /> : <Trans message="Import" />}
+        <Button form={formId} disabled={importMutation.isPending} variant="flat" color="primary" type="submit">
+          {importMutation.isPending ? <Trans message="Importing..." /> : <Trans message="Import" />}
         </Button>
       </DialogFooter>
     </Dialog>
