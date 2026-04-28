@@ -34,15 +34,21 @@ export interface BlogPostsResponse extends BackendResponse {
   };
 }
 
-export function useBlogPosts() {
+interface BlogPostsParams {
+  category?: string;
+}
+
+export function useBlogPosts(params?: BlogPostsParams) {
   return useQuery({
-    queryKey: ['blogPosts'],
-    queryFn: () => fetchBlogPosts(),
+    queryKey: ['blogPosts', params],
+    queryFn: () => fetchBlogPosts(params),
   });
 }
 
-function fetchBlogPosts() {
+function fetchBlogPosts(params?: BlogPostsParams) {
   return apiClient
-    .get<BlogPostsResponse>('blog-posts', {params: {publishedOnly: true}})
+    .get<BlogPostsResponse>('blog-posts', {
+      params: {publishedOnly: true, ...params},
+    })
     .then(response => response.data);
 }

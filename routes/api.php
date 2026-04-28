@@ -177,6 +177,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     Route::get('landing/artists', [LandingPageController::class, 'artists']);
 
     // BLOG ADMIN
+    Route::get('blog-categories/{blogCategory}', [BlogCategoryController::class, 'show']);
     Route::get('blog-categories', [BlogCategoryController::class, 'index']);
     Route::post('blog-categories', [BlogCategoryController::class, 'store']);
     Route::put('blog-categories/{blogCategory}', [BlogCategoryController::class, 'update']);

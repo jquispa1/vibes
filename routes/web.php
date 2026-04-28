@@ -14,6 +14,7 @@
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\AppHomeController;
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\FallbackRouteController;
 use App\Http\Controllers\PlaylistController;
@@ -40,6 +41,7 @@ Route::get('channels/{channel}', [ChannelController::class, 'show']);
 Route::get('channel/{channel}', [ChannelController::class, 'show']);
 
 Route::get('blog', [BlogPostController::class, 'index']);
+Route::get('blog/category/{blogCategory}', [BlogCategoryController::class, 'show']);
 Route::get('blog/{blogPost}', [BlogPostController::class, 'show']);
 
 Route::get('contact', [HomeController::class, 'render']);

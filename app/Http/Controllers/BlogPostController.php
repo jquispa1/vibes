@@ -21,6 +21,12 @@ class BlogPostController extends BaseController
     {
         $query = $this->blogPost->newQuery()->with(['author', 'categories']);
 
+        if ($category = $this->request->string('category')->toString()) {
+            $query->whereHas('categories', function ($builder) use ($category) {
+                $builder->where('slug', $category);
+            });
+        }
+
         if (
             $this->request->user()?->hasPermission('admin.access') &&
             !$this->request->boolean('publishedOnly')
@@ -50,6 +56,16 @@ class BlogPostController extends BaseController
             'pageName' => 'blog-post-page',
             'data' => [
                 'blogPost' => $blogPost->load('author', 'categories'),
+            ],
+        ]);
+    }
+
+    public function showCategory(BlogCategory $blogCategory)
+    {
+        return $this->renderClientOrApi([
+            'pageName' => 'blog-category-page',
+            'data' => [
+                'blogCategory' => $blogCategory->loadCount('blogPosts'),
             ],
         ]);
     }

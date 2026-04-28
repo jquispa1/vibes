@@ -29,6 +29,11 @@ class BlogCategory extends BaseModel
         );
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     public function insertOrRetrieve(array|Collection $categories): Collection
     {
         if (!$categories instanceof Collection) {

@@ -19,6 +19,10 @@ export const commonRoutes: RouteObject[] = [
     lazy: () => lazyRoute('BlogPage'),
   },
   {
+    path: 'blog/category/:slug',
+    lazy: () => lazyRoute('BlogCategoryPage'),
+  },
+  {
     path: 'blog/:slug',
     lazy: () => lazyRoute('BlogPostPage'),
   },

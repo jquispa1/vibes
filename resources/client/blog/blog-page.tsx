@@ -27,7 +27,15 @@ export function BlogPage() {
   );
 }
 
-function BlogPageContent({posts}: {posts: BlogPost[]}) {
+export function BlogPageContent({
+  posts,
+  title = 'Blog',
+  subtitle = 'Novedades, guías y artículos sobre la plataforma.',
+}: {
+  posts: BlogPost[];
+  title?: string;
+  subtitle?: string;
+}) {
   const featured = posts[0];
   const rest = posts.slice(1);
 
@@ -36,10 +44,10 @@ function BlogPageContent({posts}: {posts: BlogPost[]}) {
       <div className="mx-auto max-w-1280 py-48 md:py-80">
         <div className="mb-48 md:mb-64">
           <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-            Blog
+            {title}
           </h1>
           <p className="mt-12 max-w-640 text-lg text-muted">
-            Novedades, guías y artículos sobre la plataforma.
+            {subtitle}
           </p>
         </div>
 

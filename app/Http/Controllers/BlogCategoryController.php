@@ -26,6 +26,13 @@ class BlogCategoryController extends BaseController
         return $this->success(['pagination' => $pagination]);
     }
 
+    public function show(BlogCategory $blogCategory)
+    {
+        return $this->success([
+            'blogCategory' => $blogCategory->loadCount('blogPosts'),
+        ]);
+    }
+
     public function store()
     {
         $this->authorize('store', BlogCategory::class);

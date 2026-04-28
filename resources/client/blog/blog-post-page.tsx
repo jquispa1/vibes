@@ -6,6 +6,7 @@ import {Footer} from '@common/ui/footer/footer';
 import {useEffect, useRef} from 'react';
 import {highlightAllCode} from '@common/text-editor/highlight/highlight-code';
 import {PageMetaTags} from '@common/http/page-meta-tags';
+import {BlogCategory} from './blog-category';
 
 export function BlogPostPage() {
   const query = useBlogPost();
@@ -88,6 +89,19 @@ function BlogPostContent({post}: {post: any}) {
           <h1 className="text-3xl font-bold leading-tight tracking-tight md:text-5xl">
             {post.title}
           </h1>
+          {post.categories?.length ? (
+            <div className="mt-16 flex flex-wrap gap-8">
+              {post.categories.map((category: BlogCategory) => (
+                <Link
+                  key={category.id}
+                  to={`/blog/category/${category.slug}`}
+                  className="rounded-full border border-primary/20 bg-chip px-12 py-6 text-xs font-semibold tracking-wide text-primary transition-colors hover:border-primary/40"
+                >
+                  {category.name}
+                </Link>
+              ))}
+            </div>
+          ) : null}
           {(post.excerpt || post.meta_description) && (
             <p className="mt-16 text-lg leading-relaxed text-muted">
               {post.excerpt || post.meta_description}
