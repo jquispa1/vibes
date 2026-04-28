@@ -17,7 +17,7 @@ class BlogCategory extends BaseModel
         'id' => 'integer',
     ];
 
-    protected $appends = ['model_type'];
+    protected $appends = ['model_type', 'posts_count'];
 
     public function blogPosts(): BelongsToMany
     {
@@ -100,5 +100,10 @@ class BlogCategory extends BaseModel
     public static function getModelTypeAttribute(): string
     {
         return self::MODEL_TYPE;
+    }
+
+    public function getPostsCountAttribute(): int
+    {
+        return (int) ($this->attributes['blog_posts_count'] ?? 0);
     }
 }
