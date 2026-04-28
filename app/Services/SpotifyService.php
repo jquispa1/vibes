@@ -70,7 +70,15 @@ class SpotifyService
             ->get("https://api.spotify.com/v1/playlists/{$playlistId}");
 
         if ($resp->failed()) {
-            throw new \RuntimeException('Spotify playlist fetch failed: ' . $resp->status());
+            if ($resp->status() === 403) {
+                throw new \RuntimeException(__('spotify.playlist_must_be_public'), 403);
+            }
+
+            if ($resp->status() === 404) {
+                throw new \RuntimeException(__('spotify.invalid_playlist'), 404);
+            }
+
+            throw new \RuntimeException('Spotify playlist fetch failed: ' . $resp->status(), $resp->status());
         }
 
         $data = $resp->json();

@@ -29,7 +29,19 @@ class SpotifyImportController extends BaseController
             return $this->error(__('spotify.invalid_playlist'), 422);
         }
 
-        $data = $this->spotifyService->getPlaylist($playlistId);
+        try {
+            $data = $this->spotifyService->getPlaylist($playlistId);
+        } catch (\RuntimeException $exception) {
+            if ($exception->getCode() === 403) {
+                return $this->error(__('spotify.playlist_must_be_public'), 422);
+            }
+
+            if ($exception->getCode() === 404) {
+                return $this->error(__('spotify.invalid_playlist'), 422);
+            }
+
+            return $this->error($exception->getMessage(), 422);
+        }
 
         if (isset($data['public']) && !$data['public']) {
             return $this->error(__('spotify.playlist_must_be_public'), 422);
