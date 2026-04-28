@@ -1,18 +1,19 @@
-import {UseFormReturn} from 'react-hook-form';
 import {FormTextField} from '@ui/forms/input-field/text-field/text-field';
 import {Trans} from '@ui/i18n/trans';
 import {Form} from '@ui/forms/form';
-import {
-  CreateBlogCategoryPayload,
-} from '@app/admin/blog-categories-datatable-page/requests/use-create-blog-category';
+import {UseFormReturn} from 'react-hook-form';
 
 interface Props {
-  onSubmit: (values: CreateBlogCategoryPayload) => void;
+  onSubmit: (values: any) => void;
   formId: string;
-  form: UseFormReturn<CreateBlogCategoryPayload>;
+  form: UseFormReturn<any>;
 }
 
-export function CrupdateBlogCategoryForm({form, onSubmit, formId}: Props) {
+export function CrupdateBlogCategoryForm({
+  form,
+  onSubmit,
+  formId,
+}: Props) {
   return (
     <Form id={formId} form={form} onSubmit={onSubmit}>
       <FormTextField
