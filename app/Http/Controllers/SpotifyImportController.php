@@ -21,30 +21,30 @@ class SpotifyImportController extends BaseController
 
         $user = $request->user();
         if (!$user) {
-            return $this->error('Unauthenticated', 401);
+            return $this->error('Unauthenticated', [], 401);
         }
 
         $playlistId = SpotifyService::extractPlaylistId($request->input('url'));
         if (!$playlistId) {
-            return $this->error(__('spotify.invalid_playlist'), 422);
+            return $this->error(__('spotify.invalid_playlist'), [], 422);
         }
 
         try {
             $data = $this->spotifyService->getPlaylist($playlistId);
         } catch (\RuntimeException $exception) {
             if ($exception->getCode() === 403) {
-                return $this->error(__('spotify.playlist_must_be_public'), 422);
+                return $this->error(__('spotify.playlist_must_be_public'), [], 422);
             }
 
             if ($exception->getCode() === 404) {
-                return $this->error(__('spotify.invalid_playlist'), 422);
+                return $this->error(__('spotify.invalid_playlist'), [], 422);
             }
 
-            return $this->error($exception->getMessage(), 422);
+            return $this->error($exception->getMessage(), [], 422);
         }
 
         if (isset($data['public']) && !$data['public']) {
-            return $this->error(__('spotify.playlist_must_be_public'), 422);
+            return $this->error(__('spotify.playlist_must_be_public'), [], 422);
         }
 
         $playlist = new Playlist([
