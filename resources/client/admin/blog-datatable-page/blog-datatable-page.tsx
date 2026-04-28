@@ -14,8 +14,9 @@ import {OpenInNewIcon} from '@ui/icons/material/OpenInNew';
 import {BlogPost} from '@app/blog/requests/use-blog-posts';
 import articlesSvg from '@common/admin/custom-pages/articles.svg';
 import {BlogDatatablePageFilters} from '@app/admin/blog-datatable-page/blog-datatable-page-filters';
+import {BlogCategory} from '@app/blog/blog-category';
 
-const columns: ColumnConfig<BlogPost & {author?: {name: string}}>[] = [
+const columns: ColumnConfig<BlogPost & {author?: {name: string}; categories?: BlogCategory[]}>[] = [
   {
     key: 'title',
     allowsSorting: true,
@@ -34,6 +35,26 @@ const columns: ColumnConfig<BlogPost & {author?: {name: string}}>[] = [
     key: 'author',
     header: () => <Trans message="Author" />,
     body: post => post.author?.name || '-',
+  },
+  {
+    key: 'categories',
+    header: () => <Trans message="Categories" />,
+    body: post => (
+      <div className="flex flex-wrap gap-6">
+        {post.categories?.length ? (
+          post.categories.map(category => (
+            <span
+              key={category.id}
+              className="rounded-full bg-chip px-8 py-2 text-xs text-muted"
+            >
+              {category.name}
+            </span>
+          ))
+        ) : (
+          <span>-</span>
+        )}
+      </div>
+    ),
   },
   {
     key: 'status',
@@ -90,7 +111,7 @@ export function BlogDatatablePage() {
       title={<Trans message="Blog posts" />}
       columns={columns}
       filters={BlogDatatablePageFilters}
-      queryParams={{with: 'author'}}
+      queryParams={{with: 'author,categories'}}
       actions={<Actions />}
       selectedActions={<DeleteSelectedItemsAction />}
       emptyStateMessage={

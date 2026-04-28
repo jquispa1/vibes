@@ -116,6 +116,10 @@ export const appAdminRoutes: RouteObject[] = [
     lazy: () => lazyAdminRoute('BlogDatatablePage'),
   },
   {
+    path: 'blog-categories',
+    lazy: () => lazyAdminRoute('BlogCategoriesDatatablePage'),
+  },
+  {
     path: 'blog/new',
     lazy: () => lazyAdminRoute('CreateBlogPostPage'),
   },

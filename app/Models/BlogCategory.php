@@ -51,21 +51,18 @@ class BlogCategory extends BaseModel
                 }
 
                 $name = is_array($category)
-                    ? ($category['name'] ?? $category['description'] ?? null)
+                    ? ($category['name'] ?? $category['slug'] ?? null)
                     : $category;
 
                 if (!$name) {
                     return null;
                 }
 
-                $displayName = is_array($category)
-                    ? ($category['description'] ?? $category['name'] ?? $name)
-                    : $name;
+                $slug = is_array($category)
+                    ? ($category['slug'] ?? slugify($name))
+                    : slugify($name);
 
-                return $this->firstOrCreate(
-                    ['name' => slugify($name)],
-                    ['display_name' => $displayName],
-                );
+                return $this->firstOrCreate(['slug' => $slug], ['name' => $name]);
             })
             ->filter()
             ->values();
@@ -75,8 +72,8 @@ class BlogCategory extends BaseModel
     {
         return [
             'id' => $this->id,
-            'name' => $this->display_name ?: $this->name,
-            'description' => $this->display_name ?: $this->name,
+            'name' => $this->name,
+            'description' => $this->slug,
             'model_type' => self::MODEL_TYPE,
         ];
     }
@@ -86,7 +83,7 @@ class BlogCategory extends BaseModel
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'display_name' => $this->display_name,
+            'slug' => $this->slug,
         ];
     }
 

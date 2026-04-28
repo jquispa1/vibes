@@ -14,7 +14,7 @@ class PaginateBlogPosts
             $builder = BlogPost::query();
         }
 
-        $builder->with('author');
+        $builder->with(['author', 'categories']);
 
         $datasource = new Datasource($builder, $params);
 

@@ -31,13 +31,13 @@ class BlogCategoryController extends BaseController
         $this->authorize('store', BlogCategory::class);
 
         $data = $this->validate($this->request, [
-            'name' => 'required|string|max:255|unique:blog_categories,name',
-            'display_name' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
         ]);
 
         $category = $this->blogCategory->create([
-            'name' => slugify($data['name']),
-            'display_name' => $data['display_name'] ?: $data['name'],
+            'name' => $data['name'],
+            'slug' => slugify($data['slug']),
         ]);
 
         return $this->success(['blogCategory' => $category]);
@@ -54,12 +54,17 @@ class BlogCategoryController extends BaseController
                 'max:255',
                 Rule::unique('blog_categories', 'name')->ignore($blogCategory->id),
             ],
-            'display_name' => 'nullable|string|max:255',
+            'slug' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('blog_categories', 'slug')->ignore($blogCategory->id),
+            ],
         ]);
 
         $blogCategory->update([
-            'name' => slugify($data['name']),
-            'display_name' => $data['display_name'] ?: $data['name'],
+            'name' => $data['name'],
+            'slug' => slugify($data['slug']),
         ]);
 
         return $this->success(['blogCategory' => $blogCategory->fresh()]);
