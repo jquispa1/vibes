@@ -85,6 +85,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     Route::post('playlists/{id}/tracks/remove', [PlaylistTracksController::class, 'remove']);
     Route::post('playlists/{playlist}/tracks/order', [PlaylistTracksOrderController::class, 'change']);
 
+    // SPOTIFY IMPORT
+    Route::post('spotify/import-playlist', [\App\Http\Controllers\SpotifyImportController::class, 'store'])->middleware('auth:sanctum');
+
     // ARTISTS
     Route::get('artists', [ArtistController::class, 'index']);
     Route::post('artists', [ArtistController::class, 'store']);
