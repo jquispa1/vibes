@@ -17,6 +17,7 @@ use App\Http\Controllers\Artist\ArtistTracksController;
 use App\Http\Controllers\ArtistAlbumsController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\BackstageRequestController;
+use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\DownloadLocalTrackController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ImportMediaController;
@@ -176,6 +177,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     Route::get('landing/artists', [LandingPageController::class, 'artists']);
 
     // BLOG ADMIN
+    Route::get('blog-categories', [BlogCategoryController::class, 'index']);
+    Route::post('blog-categories', [BlogCategoryController::class, 'store']);
+    Route::put('blog-categories/{blogCategory}', [BlogCategoryController::class, 'update']);
+    Route::delete('blog-categories/{ids}', [BlogCategoryController::class, 'destroy']);
     Route::post('blog-posts', [BlogPostController::class, 'store']);
     Route::put('blog-posts/{blogPost}', [BlogPostController::class, 'update']);
     Route::delete('blog-posts/{ids}', [BlogPostController::class, 'destroy']);

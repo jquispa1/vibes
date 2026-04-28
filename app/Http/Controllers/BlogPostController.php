@@ -1,5 +1,6 @@
 <?php namespace App\Http\Controllers;
 
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Services\Blog\PaginateBlogPosts;
 use Common\Core\BaseController;
@@ -11,13 +12,14 @@ class BlogPostController extends BaseController
 {
     public function __construct(
         protected BlogPost $blogPost,
+        protected BlogCategory $blogCategory,
         protected Request $request,
     ) {
     }
 
     public function index()
     {
-        $query = $this->blogPost->newQuery()->with('author');
+        $query = $this->blogPost->newQuery()->with(['author', 'categories']);
 
         if (
             $this->request->user()?->hasPermission('admin.access') &&
@@ -47,7 +49,7 @@ class BlogPostController extends BaseController
         return $this->renderClientOrApi([
             'pageName' => 'blog-post-page',
             'data' => [
-                'blogPost' => $blogPost->load('author'),
+                'blogPost' => $blogPost->load('author', 'categories'),
             ],
         ]);
     }
@@ -66,6 +68,7 @@ class BlogPostController extends BaseController
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'published_at' => 'nullable|date',
+            'categories' => 'nullable|array',
         ]);
 
         $data = $this->request->only([
@@ -90,8 +93,9 @@ class BlogPostController extends BaseController
         }
 
         $blogPost = $this->blogPost->create($data);
+        $this->syncCategories($blogPost);
 
-        return $this->success(['blogPost' => $blogPost->load('author')]);
+        return $this->success(['blogPost' => $blogPost->load('author', 'categories')]);
     }
 
     public function update(BlogPost $blogPost)
@@ -113,6 +117,7 @@ class BlogPostController extends BaseController
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'published_at' => 'nullable|date',
+            'categories' => 'nullable|array',
         ]);
 
         $data = $this->request->only([
@@ -136,8 +141,17 @@ class BlogPostController extends BaseController
         }
 
         $blogPost->update($data);
+        $this->syncCategories($blogPost);
 
-        return $this->success(['blogPost' => $blogPost->fresh('author')]);
+        return $this->success(['blogPost' => $blogPost->fresh(['author', 'categories'])]);
+    }
+
+    protected function syncCategories(BlogPost $blogPost): void
+    {
+        $categories = $this->request->get('categories', []);
+        $categoryIds = $this->blogCategory->insertOrRetrieve($categories)->pluck('id');
+
+        $blogPost->categories()->sync($categoryIds);
     }
 
     public function destroy(string $ids)

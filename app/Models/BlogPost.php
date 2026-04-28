@@ -1,7 +1,9 @@
 <?php namespace App\Models;
 
+use App\Models\BlogCategory;
 use Common\Core\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
@@ -24,6 +26,16 @@ class BlogPost extends BaseModel
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            BlogCategory::class,
+            'blog_category_blog_post',
+            'blog_post_id',
+            'blog_category_id',
+        );
     }
 
     public function scopePublished($query)

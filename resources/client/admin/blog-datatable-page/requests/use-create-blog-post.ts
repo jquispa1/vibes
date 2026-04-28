@@ -5,6 +5,7 @@ import {DatatableDataQueryKey} from '@common/datatable/requests/paginated-resour
 import {toast} from '@ui/toast/toast';
 import {message} from '@ui/i18n/message';
 import {BlogPost} from '@app/blog/requests/use-blog-posts';
+import {ChipValue} from '@ui/forms/input-field/chip-field/chip-field';
 
 export interface CreateBlogPostPayload {
   title?: string;
@@ -15,6 +16,7 @@ export interface CreateBlogPostPayload {
   status?: 'draft' | 'published';
   meta_title?: string;
   meta_description?: string;
+  categories?: ChipValue[];
 }
 
 interface Response {

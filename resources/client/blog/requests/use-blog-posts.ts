@@ -1,6 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import {apiClient} from '@common/http/query-client';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
+import {BlogCategory} from '@app/blog/blog-category';
 
 export interface BlogAuthor {
   id: number;
@@ -21,6 +22,7 @@ export interface BlogPost {
   updated_at?: string;
   status: 'draft' | 'published';
   author?: BlogAuthor | null;
+  categories?: BlogCategory[];
 }
 
 export interface BlogPostsResponse extends BackendResponse {

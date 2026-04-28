@@ -13,6 +13,7 @@ import {Trans} from '@ui/i18n/trans';
 import {FormTextField} from '@ui/forms/input-field/text-field/text-field';
 import {FormSelect} from '@ui/forms/select/select';
 import {Item} from '@ui/forms/listbox/item';
+import {FormNormalizedModelChipField} from '@common/tags/form-normalized-model-chip-field';
 import {DialogTrigger} from '@ui/overlays/dialog/dialog-trigger';
 import {Dialog} from '@ui/overlays/dialog/dialog';
 import {DialogHeader} from '@ui/overlays/dialog/dialog-header';
@@ -20,6 +21,9 @@ import {DialogBody} from '@ui/overlays/dialog/dialog-body';
 import {DialogFooter} from '@ui/overlays/dialog/dialog-footer';
 import {SettingsIcon} from '@ui/icons/material/Settings';
 import {IconButton} from '@ui/buttons/icon-button';
+import {BLOG_CATEGORY_MODEL} from '@app/blog/blog-category';
+import {message} from '@ui/i18n/message';
+import {useTrans} from '@ui/i18n/use-trans';
 
 import {useDialogContext} from '@ui/overlays/dialog/dialog-context';
 
@@ -34,6 +38,7 @@ export function CreateBlogPostPage() {
     defaultValues: {
       title: '',
       status: 'draft',
+      categories: [],
     },
   });
 
@@ -105,6 +110,7 @@ function BlogPostSettingsDialog() {
 
 function BlogPostSettingsDialogContent() {
   const {close} = useDialogContext();
+  const {trans} = useTrans();
   return (
     <Dialog size="lg">
       <DialogHeader>
@@ -141,6 +147,14 @@ function BlogPostSettingsDialogContent() {
           label={<Trans message="Meta description" />}
           inputElementType="textarea"
           rows={4}
+        />
+        <FormNormalizedModelChipField
+          className="mb-24"
+          name="categories"
+          model={BLOG_CATEGORY_MODEL}
+          allowCustomValue
+          placeholder={trans(message('+Add category'))}
+          label={<Trans message="Categories" />}
         />
         <FormSelect
           className="mb-24"

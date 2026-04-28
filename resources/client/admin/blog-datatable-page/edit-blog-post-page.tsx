@@ -17,6 +17,7 @@ import {Trans} from '@ui/i18n/trans';
 import {FormTextField} from '@ui/forms/input-field/text-field/text-field';
 import {FormSelect} from '@ui/forms/select/select';
 import {Item} from '@ui/forms/listbox/item';
+import {FormNormalizedModelChipField} from '@common/tags/form-normalized-model-chip-field';
 import {DialogTrigger} from '@ui/overlays/dialog/dialog-trigger';
 import {Dialog} from '@ui/overlays/dialog/dialog';
 import {DialogHeader} from '@ui/overlays/dialog/dialog-header';
@@ -25,6 +26,9 @@ import {DialogFooter} from '@ui/overlays/dialog/dialog-footer';
 import {useDialogContext} from '@ui/overlays/dialog/dialog-context';
 import {SettingsIcon} from '@ui/icons/material/Settings';
 import {IconButton} from '@ui/buttons/icon-button';
+import {BLOG_CATEGORY_MODEL} from '@app/blog/blog-category';
+import {message} from '@ui/i18n/message';
+import {useTrans} from '@ui/i18n/use-trans';
 
 const ArticleBodyEditor = React.lazy(
   () => import('@common/article-editor/article-body-editor'),
@@ -58,6 +62,7 @@ function PageContent() {
       meta_title: query.data?.blogPost.meta_title || '',
       meta_description: query.data?.blogPost.meta_description || '',
       status: query.data?.blogPost.status,
+      categories: query.data?.blogPost.categories || [],
     },
   });
 
@@ -129,6 +134,7 @@ function BlogPostSettingsDialog() {
 
 function BlogPostSettingsDialogContent() {
   const {close} = useDialogContext();
+  const {trans} = useTrans();
   return (
     <Dialog size="lg">
       <DialogHeader>
@@ -165,6 +171,14 @@ function BlogPostSettingsDialogContent() {
           label={<Trans message="Meta description" />}
           inputElementType="textarea"
           rows={4}
+        />
+        <FormNormalizedModelChipField
+          className="mb-24"
+          name="categories"
+          model={BLOG_CATEGORY_MODEL}
+          allowCustomValue
+          placeholder={trans(message('+Add category'))}
+          label={<Trans message="Categories" />}
         />
         <FormSelect
           className="mb-24"
