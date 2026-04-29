@@ -9,11 +9,15 @@ class SpotifyService
 {
     protected string $clientId;
     protected string $clientSecret;
+    protected ?string $importApiUrl = null;
+    protected ?string $importApiHost = null;
 
     public function __construct()
     {
         $this->clientId = config('services.spotify.client_id');
         $this->clientSecret = config('services.spotify.client_secret');
+        $this->importApiUrl = config('services.spotify.import_api_url');
+        $this->importApiHost = config('services.spotify.import_api_host');
     }
 
     public function getAuthorizationUrl(string $state): string
@@ -117,6 +121,58 @@ class SpotifyService
 
     public function getPlaylist(string $playlistId, ?string $token = null): array
     {
+        // If an external import API is configured, use it instead of calling Spotify
+        if (!empty($this->importApiUrl)) {
+            $playlistUrl = "https://open.spotify.com/playlist/{$playlistId}";
+            $headers = [];
+            if (!empty($this->importApiHost)) {
+                $headers['Host'] = $this->importApiHost;
+            }
+
+            $resp = Http::withHeaders($headers)->get($this->importApiUrl, ['url' => $playlistUrl]);
+
+            if ($resp->failed()) {
+                \Illuminate\Support\Facades\Log::error('External import API failed', [
+                    'status' => $resp->status(),
+                    'body' => $resp->body(),
+                    'url' => $this->importApiUrl,
+                    'playlist' => $playlistId,
+                ]);
+
+                throw new \RuntimeException('External playlist fetch failed: ' . $resp->status(), $resp->status());
+            }
+
+            $data = $resp->json();
+
+            // If external API wraps response under 'playlist', unwrap it
+            if (isset($data['playlist'])) {
+                $data = $data['playlist'];
+            }
+
+            // If external API returns a plain tracks array, normalize to expected shape
+            if (isset($data['tracks']) && !isset($data['all_tracks'])) {
+                $allTracks = [];
+                foreach ($data['tracks'] as $t) {
+                    $track = $t;
+
+                    // If API didn't include numeric id, try to extract it from the uri
+                    if (empty($track['id']) && !empty($track['uri'])) {
+                        // uri formats: spotify:track:{id} or https://.../track/{id}
+                        if (preg_match('/(?:spotify:track:|track\/)([A-Za-z0-9]+)/', $track['uri'], $m)) {
+                            $track['id'] = $m[1];
+                        } elseif (preg_match('/([^:\/]+)$/', $track['uri'], $m)) {
+                            $track['id'] = $m[1];
+                        }
+                    }
+
+                    $allTracks[] = ['track' => $track, 'added_at' => $t['added_at'] ?? null];
+                }
+                $data['all_tracks'] = $allTracks;
+            }
+
+            return $data;
+        }
+
         $token = $token ?: $this->getToken();
 
         $resp = Http::withToken($token)
