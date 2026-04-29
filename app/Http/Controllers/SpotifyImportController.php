@@ -271,9 +271,13 @@ class SpotifyImportController extends BaseController
                 ]);
             }
 
-            $playlist->tracks()->attach($track->id, ['position' => $position]);
-            $position++;
-            $attached++;
+            // Avoid duplicate pivot inserts which violate unique constraint
+            $alreadyAttached = $playlist->tracks()->where('tracks.id', $track->id)->exists();
+            if (!$alreadyAttached) {
+                $playlist->tracks()->attach($track->id, ['position' => $position]);
+                $position++;
+                $attached++;
+            }
         }
 
         return [
