@@ -140,6 +140,16 @@ class SpotifyImportController extends BaseController
 
     public function callback(Request $request)
     {
+        // LOG TEMPORAL DE DEBUG
+        \Illuminate\Support\Facades\Log::info('Spotify callback hit', [
+            'has_code'  => $request->filled('code'),
+            'has_state' => $request->filled('state'),
+            'has_error' => $request->filled('error'),
+            'user_id'   => $request->user()?->id,
+            'session_state' => $request->session()->get('spotify_import_state') ? 'present' : 'missing',
+            'session_url'   => $request->session()->get('spotify_import_url') ? 'present' : 'missing',
+        ]);
+
         if ($request->filled('error')) {
             return redirect('/spotify/import?spotify_import_error=' . urlencode(__('spotify.oauth_denied')));
         }
