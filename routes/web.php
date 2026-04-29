@@ -45,10 +45,13 @@ Route::get('blog', [BlogPostController::class, 'index']);
 Route::get('blog/category/{blogCategory}', [BlogCategoryController::class, 'show']);
 Route::get('blog/{blogPost}', [BlogPostController::class, 'show']);
 
-Route::middleware('auth')->prefix('spotify/import')->name('spotify.import.')->group(function () {
-    Route::get('authorize', [SpotifyImportController::class, 'start'])->name('authorize');
-    Route::get('callback', [SpotifyImportController::class, 'callback'])->name('callback');
-});
+// El authorize requiere estar logueado en la app
+Route::middleware('auth')->get('spotify/import/authorize', [SpotifyImportController::class, 'start'])
+    ->name('spotify.import.authorize');
+
+// El callback NO lleva 'auth' — Spotify redirige aquí y la sesión puede no estar activa
+Route::get('spotify/import/callback', [SpotifyImportController::class, 'callback'])
+    ->name('spotify.import.callback');
 
 Route::get('contact', [HomeController::class, 'render']);
 Route::get('login', [HomeController::class, 'render'])->name('login');
@@ -65,7 +68,6 @@ Route::get('/app-ads.txt', function () {
     ]);
 });
 
-
 Route::get('/app-ads.txt', function () {
     return redirect('/public/app-ads.txt');
 });
@@ -75,7 +77,6 @@ Route::get('/ads.txt', function () {
         'Content-Type' => 'text/plain'
     ]);
 });
-
 
 Route::get('/ads.txt', function () {
     return redirect('/public/ads.txt');
