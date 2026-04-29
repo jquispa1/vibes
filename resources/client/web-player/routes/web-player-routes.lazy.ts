@@ -21,3 +21,4 @@ export {HomepageChannelPage} from '@app/web-player/channels/homepage-channel-pag
 export {LyricsPage} from '@app/web-player/tracks/lyrics/lyrics-page';
 export {LandingPage} from '@app/landing-page/landing-page';
 export {Homepage} from '@app/homepage';
+export {SpotifyImportPage} from '@app/spotify-import/spotify-import-page';

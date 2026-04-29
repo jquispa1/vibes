@@ -104,6 +104,12 @@ export const webPlayerRoutes: RouteObject[] = [
         lazy: () => lazyRoute('SearchResultsPage'),
       },
 
+      // spotify import (con sidebar del web player)
+      {
+        path: 'spotify/import',
+        lazy: () => lazyRoute('SpotifyImportPage'),
+      },
+
       // library
       {
         loader: () => authGuard(),
