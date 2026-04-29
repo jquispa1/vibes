@@ -174,6 +174,10 @@ class SpotifyImportController extends BaseController
             \Illuminate\Support\Facades\Log::info('Spotify: exchanging code', ['playlist' => $playlistId]);
             $accessToken = $this->spotifyService->exchangeAuthorizationCode($request->input('code'));
             \Illuminate\Support\Facades\Log::info('Spotify token exchanged', ['token_prefix' => substr($accessToken, 0, 10)]);
+
+            // Obtener el perfil del usuario para debug
+            $meResp = \Illuminate\Support\Facades\Http::withToken($accessToken)->get('https://api.spotify.com/v1/me');
+            \Illuminate\Support\Facades\Log::info('Spotify user profile', $meResp->json());
             $data = $this->spotifyService->getPlaylist($playlistId, $accessToken);
             \Illuminate\Support\Facades\Log::info('Spotify playlist fetched', ['name' => $data['name'] ?? 'unknown', 'tracks' => count($data['all_tracks'] ?? [])]);
             $result = $this->importPlaylist($request->user(), $data);
