@@ -13,6 +13,63 @@ class SpotifyImportController extends BaseController
     {
     }
 
+    /**
+     * Retorna los datos de una playlist pública de Spotify usando solo
+     * Client Credentials (sin que el usuario se loguee en Spotify).
+     *
+     * GET /api/v1/spotify/playlists/{playlistId}
+     */
+    public function showPublic(Request $request, string $playlistId)
+    {
+        $playlistId = SpotifyService::extractPlaylistId($playlistId);
+
+        if (!$playlistId) {
+            return $this->error(__('spotify.invalid_playlist'), [], 422);
+        }
+
+        try {
+            $data = $this->spotifyService->getPublicPlaylist($playlistId);
+        } catch (\RuntimeException $exception) {
+            return match ($exception->getCode()) {
+                403 => $this->error(__('spotify.playlist_not_accessible'), [], 403),
+                404 => $this->error(__('spotify.invalid_playlist'), [], 404),
+                default => $this->error($exception->getMessage(), [], 422),
+            };
+        }
+
+        // Devolver solo los campos útiles (sin inflar la respuesta)
+        return $this->success([
+            'playlist' => [
+                'id'          => $data['id'],
+                'name'        => $data['name'],
+                'description' => $data['description'],
+                'public'      => $data['public'],
+                'image'       => $data['images'][0]['url'] ?? null,
+                'owner'       => [
+                    'id'           => $data['owner']['id'],
+                    'display_name' => $data['owner']['display_name'],
+                ],
+                'tracks_total' => $data['tracks']['total'] ?? count($data['all_tracks'] ?? []),
+                'tracks'       => collect($data['all_tracks'] ?? [])->map(function ($item) {
+                    $track = $item['track'] ?? $item;
+                    if (empty($track['id'])) return null;
+                    return [
+                        'id'         => $track['id'],
+                        'name'       => $track['name'],
+                        'duration_ms'=> $track['duration_ms'],
+                        'explicit'   => $track['explicit'],
+                        'artists'    => collect($track['artists'] ?? [])->pluck('name'),
+                        'album'      => $track['album']['name'] ?? null,
+                        'image'      => $track['album']['images'][0]['url'] ?? null,
+                        'added_at'   => $item['added_at'],
+                        'spotify_url'=> $track['external_urls']['spotify'] ?? null,
+                    ];
+                })->filter()->values(),
+                'spotify_url' => $data['external_urls']['spotify'] ?? null,
+            ],
+        ]);
+    }
+
     public function start(Request $request)
     {
         $this->validate($request, [

@@ -2,14 +2,13 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class SpotifyService
 {
     protected string $clientId;
     protected string $clientSecret;
-    protected ?string $token = null;
-    protected ?int $tokenExpiresAt = null;
 
     public function __construct()
     {
@@ -28,27 +27,46 @@ class SpotifyService
         ]);
     }
 
+    /**
+     * Obtiene un token de app (Client Credentials) cacheado en Redis/Cache.
+     * No requiere que el usuario esté autenticado con Spotify.
+     * Sirve para leer cualquier playlist pública.
+     */
+    public function getAppToken(): string
+    {
+        return Cache::remember('spotify_app_token', 3540, function () {
+            $response = Http::asForm()
+                ->withBasicAuth($this->clientId, $this->clientSecret)
+                ->post('https://accounts.spotify.com/api/token', [
+                    'grant_type' => 'client_credentials',
+                ]);
+
+            if ($response->failed()) {
+                throw new \RuntimeException('Unable to fetch Spotify app token');
+            }
+
+            return $response->json('access_token');
+        });
+    }
+
+    /**
+     * @deprecated Usar getAppToken() para playlists públicas.
+     * Mantenido por compatibilidad con el flujo OAuth de usuario.
+     */
     protected function getToken(): string
     {
-        if ($this->token && $this->tokenExpiresAt && time() < $this->tokenExpiresAt) {
-            return $this->token;
-        }
+        return $this->getAppToken();
+    }
 
-        $response = Http::asForm()
-            ->withBasicAuth($this->clientId, $this->clientSecret)
-            ->post('https://accounts.spotify.com/api/token', [
-                'grant_type' => 'client_credentials',
-            ]);
-
-        if ($response->failed()) {
-            throw new \RuntimeException('Unable to fetch Spotify token');
-        }
-
-        $data = $response->json();
-        $this->token = $data['access_token'] ?? null;
-        $this->tokenExpiresAt = time() + (($data['expires_in'] ?? 3600) - 60);
-
-        return $this->token;
+    /**
+     * Obtiene una playlist pública de Spotify sin necesidad de que el usuario
+     * esté autenticado. Usa el token de app (Client Credentials).
+     *
+     * @throws \RuntimeException si la playlist no existe, no es pública o hay error de API
+     */
+    public function getPublicPlaylist(string $playlistId): array
+    {
+        return $this->getPlaylist($playlistId, $this->getAppToken());
     }
 
     public function exchangeAuthorizationCode(string $code): string
