@@ -89,6 +89,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     Route::post('spotify/import-playlist', [\App\Http\Controllers\SpotifyImportController::class, 'store'])->middleware('auth:sanctum');
     // Obtener playlist pública de Spotify sin login de usuario (Client Credentials)
     Route::get('spotify/playlists/{playlistId}', [\App\Http\Controllers\SpotifyImportController::class, 'showPublic']);
+    // DEBUG TEMPORAL - borrar después
+    Route::get('spotify/debug', [\App\Http\Controllers\SpotifyImportController::class, 'debug']);
 
     // ARTISTS
     Route::get('artists', [ArtistController::class, 'index']);

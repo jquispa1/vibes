@@ -19,6 +19,59 @@ class SpotifyImportController extends BaseController
      *
      * GET /api/v1/spotify/playlists/{playlistId}
      */
+    // DEBUG TEMPORAL - borrar después de diagnosticar
+    public function debug(Request $request)
+    {
+        $results = [];
+
+        // 1. Credenciales configuradas?
+        $results['config'] = [
+            'client_id_set'     => !empty(config('services.spotify.client_id')),
+            'client_secret_set' => !empty(config('services.spotify.client_secret')),
+            'client_id_prefix'  => substr(config('services.spotify.client_id') ?? '', 0, 6) . '...',
+        ];
+
+        // 2. Obtener token de app
+        try {
+            $token = $this->spotifyService->getAppToken();
+            $results['token'] = [
+                'ok'     => true,
+                'prefix' => substr($token, 0, 10) . '...',
+            ];
+        } catch (\Throwable $e) {
+            $results['token'] = ['ok' => false, 'error' => $e->getMessage()];
+            return $this->success($results);
+        }
+
+        // 3. Llamada raw a Spotify con una playlist pública conocida
+        $testId = $request->query('id', '3cEYpjA9oz9GiPac4AsH4n'); // playlist pública de Spotify
+        $resp = \Illuminate\Support\Facades\Http::withToken($token)
+            ->get("https://api.spotify.com/v1/playlists/{$testId}");
+
+        $results['raw_request'] = [
+            'playlist_id' => $testId,
+            'status'      => $resp->status(),
+            'headers'     => $resp->headers(),
+        ];
+
+        $body = $resp->json();
+        $results['raw_response'] = [
+            'error'       => $body['error'] ?? null,
+            'id'          => $body['id'] ?? null,
+            'name'        => $body['name'] ?? null,
+            'has_items'   => isset($body['items']),
+            'has_tracks'  => isset($body['tracks']),
+            'items_total' => $body['items']['total'] ?? $body['tracks']['total'] ?? null,
+            'first_item'  => isset($body['items']['items'][0])
+                ? ($body['items']['items'][0]['item']['name'] ?? $body['items']['items'][0]['track']['name'] ?? 'unknown')
+                : (isset($body['tracks']['items'][0])
+                    ? ($body['tracks']['items'][0]['item']['name'] ?? $body['tracks']['items'][0]['track']['name'] ?? 'unknown')
+                    : null),
+        ];
+
+        return $this->success($results);
+    }
+
     public function showPublic(Request $request, string $playlistId)
     {
         $playlistId = SpotifyService::extractPlaylistId($playlistId);
