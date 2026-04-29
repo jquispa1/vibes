@@ -5,12 +5,58 @@ use App\Models\Track;
 use App\Services\SpotifyService;
 use Common\Core\BaseController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SpotifyImportController extends BaseController
 {
     public function __construct(protected SpotifyService $spotifyService)
     {
-        $this->middleware('auth:sanctum');
+    }
+
+    public function start(Request $request)
+    {
+        $this->validate($request, [
+            'url' => 'required|string',
+        ]);
+
+        $state = Str::random(40);
+        $request->session()->put('spotify_import_url', $request->input('url'));
+        $request->session()->put('spotify_import_state', $state);
+
+        return redirect()->away($this->spotifyService->getAuthorizationUrl($state));
+    }
+
+    public function callback(Request $request)
+    {
+        if ($request->filled('error')) {
+            return redirect('/spotify/import?spotify_import_error=' . urlencode(__('spotify.oauth_denied')));
+        }
+
+        $storedState = $request->session()->pull('spotify_import_state');
+        $storedUrl = $request->session()->pull('spotify_import_url');
+
+        if (!$storedState || !$request->filled('state') || !hash_equals($storedState, $request->string('state')->toString())) {
+            return redirect('/spotify/import?spotify_import_error=' . urlencode(__('spotify.oauth_state_invalid')));
+        }
+
+        if (!$storedUrl) {
+            return redirect('/spotify/import?spotify_import_error=' . urlencode(__('spotify.invalid_playlist')));
+        }
+
+        $playlistId = SpotifyService::extractPlaylistId($storedUrl);
+        if (!$playlistId) {
+            return redirect('/spotify/import?spotify_import_error=' . urlencode(__('spotify.invalid_playlist')));
+        }
+
+        try {
+            $accessToken = $this->spotifyService->exchangeAuthorizationCode($request->input('code'));
+            $data = $this->spotifyService->getPlaylist($playlistId, $accessToken);
+            $result = $this->importPlaylist($request->user(), $data);
+        } catch (\Throwable $exception) {
+            return redirect('/spotify/import?spotify_import_error=' . urlencode($this->mapSpotifyExceptionToMessage($exception)));
+        }
+
+        return redirect('/spotify/import?spotify_import=success&attached=' . $result['attached'] . '&total=' . $result['total']);
     }
 
     public function store(Request $request)
@@ -33,7 +79,7 @@ class SpotifyImportController extends BaseController
             $data = $this->spotifyService->getPlaylist($playlistId);
         } catch (\RuntimeException $exception) {
             if ($exception->getCode() === 403) {
-                return $this->error(__('spotify.playlist_must_be_public'), [], 422);
+                return $this->error(__('spotify.playlist_not_accessible'), [], 422);
             }
 
             if ($exception->getCode() === 404) {
@@ -47,6 +93,13 @@ class SpotifyImportController extends BaseController
             return $this->error(__('spotify.playlist_must_be_public'), [], 422);
         }
 
+        $result = $this->importPlaylist($user, $data);
+
+        return $this->success(['playlist' => $result['playlist'], 'attached' => $result['attached'], 'total' => $result['total']]);
+    }
+
+    protected function importPlaylist($user, array $data): array
+    {
         $playlist = new Playlist([
             'name' => $data['name'] ?? 'Spotify playlist',
             'description' => $data['description'] ?? null,
@@ -84,6 +137,25 @@ class SpotifyImportController extends BaseController
             $attached++;
         }
 
-        return $this->success(['playlist' => $playlist->fresh('tracks'), 'attached' => $attached, 'total' => $total]);
+        return [
+            'playlist' => $playlist->fresh('tracks'),
+            'attached' => $attached,
+            'total' => $total,
+        ];
+    }
+
+    protected function mapSpotifyExceptionToMessage(\Throwable $exception): string
+    {
+        if ($exception instanceof \RuntimeException) {
+            if ($exception->getCode() === 403) {
+                return __('spotify.playlist_not_accessible');
+            }
+
+            if ($exception->getCode() === 404) {
+                return __('spotify.invalid_playlist');
+            }
+        }
+
+        return $exception->getMessage() ?: __('spotify.playlist_not_accessible');
     }
 }

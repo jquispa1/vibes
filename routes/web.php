@@ -17,6 +17,7 @@ use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\FallbackRouteController;
+use App\Http\Controllers\SpotifyImportController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\Search\SearchController;
 use App\Http\Controllers\TrackController as TrackControllerAlias;
@@ -43,6 +44,11 @@ Route::get('channel/{channel}', [ChannelController::class, 'show']);
 Route::get('blog', [BlogPostController::class, 'index']);
 Route::get('blog/category/{blogCategory}', [BlogCategoryController::class, 'show']);
 Route::get('blog/{blogPost}', [BlogPostController::class, 'show']);
+
+Route::middleware('auth')->prefix('spotify/import')->name('spotify.import.')->group(function () {
+    Route::get('authorize', [SpotifyImportController::class, 'start'])->name('authorize');
+    Route::get('callback', [SpotifyImportController::class, 'callback'])->name('callback');
+});
 
 Route::get('contact', [HomeController::class, 'render']);
 Route::get('login', [HomeController::class, 'render'])->name('login');

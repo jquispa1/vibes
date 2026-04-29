@@ -17,6 +17,17 @@ class SpotifyService
         $this->clientSecret = config('services.spotify.client_secret');
     }
 
+    public function getAuthorizationUrl(string $state): string
+    {
+        return 'https://accounts.spotify.com/authorize?' . http_build_query([
+            'response_type' => 'code',
+            'client_id' => $this->clientId,
+            'redirect_uri' => route('spotify.import.callback'),
+            'scope' => 'playlist-read-private playlist-read-collaborative',
+            'state' => $state,
+        ]);
+    }
+
     protected function getToken(): string
     {
         if ($this->token && $this->tokenExpiresAt && time() < $this->tokenExpiresAt) {
@@ -38,6 +49,30 @@ class SpotifyService
         $this->tokenExpiresAt = time() + (($data['expires_in'] ?? 3600) - 60);
 
         return $this->token;
+    }
+
+    public function exchangeAuthorizationCode(string $code): string
+    {
+        $response = Http::asForm()
+            ->withBasicAuth($this->clientId, $this->clientSecret)
+            ->post('https://accounts.spotify.com/api/token', [
+                'grant_type' => 'authorization_code',
+                'code' => $code,
+                'redirect_uri' => route('spotify.import.callback'),
+            ]);
+
+        if ($response->failed()) {
+            throw new \RuntimeException('Unable to exchange Spotify authorization code', $response->status());
+        }
+
+        $data = $response->json();
+        $token = $data['access_token'] ?? null;
+
+        if (!$token) {
+            throw new \RuntimeException('Spotify authorization did not return an access token');
+        }
+
+        return $token;
     }
 
     public static function extractPlaylistId(string $input): ?string
@@ -62,16 +97,16 @@ class SpotifyService
         return $input ?: null;
     }
 
-    public function getPlaylist(string $playlistId): array
+    public function getPlaylist(string $playlistId, ?string $token = null): array
     {
-        $token = $this->getToken();
+        $token = $token ?: $this->getToken();
 
         $resp = Http::withToken($token)
             ->get("https://api.spotify.com/v1/playlists/{$playlistId}");
 
         if ($resp->failed()) {
             if ($resp->status() === 403) {
-                throw new \RuntimeException(__('spotify.playlist_must_be_public'), 403);
+                throw new \RuntimeException(__('spotify.playlist_not_accessible'), 403);
             }
 
             if ($resp->status() === 404) {
