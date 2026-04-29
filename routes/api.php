@@ -52,6 +52,12 @@ use Common\Channels\ChannelContentOrderController;
 use Common\Channels\ChannelController;
 use Common\Channels\ChannelItemController;
 
+// Rutas públicas de Spotify (sin auth, sin verified) - ANTES del grupo principal
+Route::group(['prefix' => 'v1', 'middleware' => ['api']], function () {
+    Route::get('spotify/debug', [\App\Http\Controllers\SpotifyImportController::class, 'debug']);
+    Route::get('spotify/playlists/{playlistId}', [\App\Http\Controllers\SpotifyImportController::class, 'showPublic']);
+});
+
 Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verified']], function() {
     // SEARCH
     Route::get('search/audio/{trackId}/{artistName}/{trackName}', [SearchController::class, 'searchAudio']);
@@ -192,9 +198,4 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     // BLOG (dentro del grupo para que optionalAuth reconozca al admin)
     Route::get('blog-posts', [BlogPostController::class, 'index']);
     Route::get('blog-posts/{blogPost}', [BlogPostController::class, 'show']);
-});
-// Rutas públicas de Spotify (sin auth requerida)
-Route::group(['prefix' => 'v1'], function () {
-    Route::get('spotify/debug', [\App\Http\Controllers\SpotifyImportController::class, 'debug']);
-    Route::get('spotify/playlists/{playlistId}', [\App\Http\Controllers\SpotifyImportController::class, 'showPublic']);
 });
