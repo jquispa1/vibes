@@ -250,6 +250,13 @@ class SpotifyImportController extends BaseController
         $playlist->owner()->associate($user);
         $playlist->save();
 
+        // Ensure the playlist appears in the user's playlists view
+        // `users.playlists` is a pivot relation (followed playlists), so attach
+        // the created playlist to the user's playlists without detaching existing.
+        if (method_exists($user, 'playlists')) {
+            $user->playlists()->syncWithoutDetaching([$playlist->id]);
+        }
+
         $position = 0;
         $attached = 0;
         $total = count($data['all_tracks'] ?? []);
