@@ -177,7 +177,10 @@ class SpotifyImportController extends BaseController
 
             // Obtener el perfil del usuario para debug
             $meResp = \Illuminate\Support\Facades\Http::withToken($accessToken)->get('https://api.spotify.com/v1/me');
-            \Illuminate\Support\Facades\Log::info('Spotify user profile', $meResp->json() ?? ['error' => 'no data']);
+            \Illuminate\Support\Facades\Log::info('Spotify user profile raw', [
+                'status' => $meResp->status(),
+                'body'   => $meResp->body(),
+            ]);
             $data = $this->spotifyService->getPlaylist($playlistId, $accessToken);
             \Illuminate\Support\Facades\Log::info('Spotify playlist fetched', ['name' => $data['name'] ?? 'unknown', 'tracks' => count($data['all_tracks'] ?? [])]);
             $result = $this->importPlaylist($request->user(), $data);
