@@ -1,18 +1,19 @@
-import {useDialogContext} from '@ui/overlays/dialog/dialog-context';
-import {DialogBody} from '@ui/overlays/dialog/dialog-body';
-import {DialogFooter} from '@ui/overlays/dialog/dialog-footer';
 import {Dialog} from '@ui/overlays/dialog/dialog';
 import {DialogHeader} from '@ui/overlays/dialog/dialog-header';
-import {useForm} from 'react-hook-form';
 import {Trans} from '@ui/i18n/trans';
+import {DialogBody} from '@ui/overlays/dialog/dialog-body';
+import {useForm} from 'react-hook-form';
+import {Form} from '@ui/forms/form';
+import {useDialogContext} from '@ui/overlays/dialog/dialog-context';
+import {FormTextField} from '@ui/forms/input-field/text-field/text-field';
+import {DialogFooter} from '@ui/overlays/dialog/dialog-footer';
 import {Button} from '@ui/buttons/button';
-import {Input} from '@ui/forms/input-field/input';
-import {useState} from 'react';
+import {useImportPlaylist} from './requests/use-import-playlist';
 
 export function ImportPlaylistDialog() {
   const {close, formId} = useDialogContext();
   const form = useForm<{url: string}>({defaultValues: {url: ''}});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const importPlaylist = useImportPlaylist();
 
   return (
     <Dialog>
@@ -20,34 +21,45 @@ export function ImportPlaylistDialog() {
         <Trans message="Import Spotify playlist" />
       </DialogHeader>
       <DialogBody>
-        <form
+        <Form
           id={formId}
-          method="GET"
-          action="/spotify/import/authorize"
-          onSubmit={() => setIsSubmitting(true)}
+          form={form}
+          onSubmit={values => {
+            importPlaylist.mutate(values, {
+              onSuccess: response => {
+                close(response.playlist);
+              },
+            });
+          }}
         >
           <div className="space-y-12">
             <div>
-              <label className="mb-8 block text-sm font-medium text-muted"><Trans message="Playlist URL or ID" /></label>
-              <Input>
-                <input
-                  {...form.register('url', {required: true})}
-                  placeholder="https://open.spotify.com/playlist/..."
-                />
-              </Input>
+              <FormTextField
+                autoFocus
+                required
+                name="url"
+                label={<Trans message="Playlist URL or ID" />}
+                placeholder="https://open.spotify.com/playlist/..."
+              />
               <p className="mt-8 text-sm text-muted">
-                <Trans message="Spotify will ask you to authorize access to this playlist." />
+                <Trans message="Pega una URL de playlist pública para importarla en tu cuenta." />
               </p>
             </div>
           </div>
-        </form>
+        </Form>
       </DialogBody>
       <DialogFooter>
         <Button onClick={() => close()}>
           <Trans message="Cancel" />
         </Button>
-        <Button form={formId} disabled={isSubmitting} variant="flat" color="primary" type="submit">
-          {isSubmitting ? <Trans message="Redirecting..." /> : <Trans message="Import" />}
+        <Button
+          form={formId}
+          variant="flat"
+          color="primary"
+          type="submit"
+          disabled={importPlaylist.isPending}
+        >
+          <Trans message="Import" />
         </Button>
       </DialogFooter>
     </Dialog>
