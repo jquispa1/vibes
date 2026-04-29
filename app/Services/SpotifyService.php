@@ -123,6 +123,12 @@ class SpotifyService
             ->get("https://api.spotify.com/v1/playlists/{$playlistId}");
 
         if ($resp->failed()) {
+            \Illuminate\Support\Facades\Log::error('Spotify getPlaylist failed', [
+                'status'   => $resp->status(),
+                'body'     => $resp->body(),
+                'playlist' => $playlistId,
+            ]);
+
             if ($resp->status() === 403) {
                 throw new \RuntimeException(__('spotify.playlist_not_accessible'), 403);
             }

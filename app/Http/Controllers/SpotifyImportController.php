@@ -172,9 +172,16 @@ class SpotifyImportController extends BaseController
 
         try {
             $accessToken = $this->spotifyService->exchangeAuthorizationCode($request->input('code'));
+            \Illuminate\Support\Facades\Log::info('Spotify token exchanged', ['token_prefix' => substr($accessToken, 0, 10)]);
             $data = $this->spotifyService->getPlaylist($playlistId, $accessToken);
+            \Illuminate\Support\Facades\Log::info('Spotify playlist fetched', ['name' => $data['name'] ?? 'unknown', 'tracks' => count($data['all_tracks'] ?? [])]);
             $result = $this->importPlaylist($request->user(), $data);
         } catch (\Throwable $exception) {
+            \Illuminate\Support\Facades\Log::error('Spotify import failed', [
+                'message' => $exception->getMessage(),
+                'code'    => $exception->getCode(),
+                'trace'   => $exception->getTraceAsString(),
+            ]);
             return redirect('/spotify/import?spotify_import_error=' . urlencode($this->mapSpotifyExceptionToMessage($exception)));
         }
 
