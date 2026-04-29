@@ -54,8 +54,10 @@ use Common\Channels\ChannelItemController;
 
 // Rutas públicas de Spotify (sin auth, sin verified) - ANTES del grupo principal
 Route::group(['prefix' => 'v1', 'middleware' => ['api']], function () {
-    Route::get('spotify/debug', [\App\Http\Controllers\SpotifyImportController::class, 'debug']);
-    Route::get('spotify/playlists/{playlistId}', [\App\Http\Controllers\SpotifyImportController::class, 'showPublic']);
+    Route::get('spotify/debug', [\App\Http\Controllers\SpotifyImportController::class, 'debug'])
+        ->withoutMiddleware(\Common\Auth\Middleware\VerifyApiAccessMiddleware::class);
+    Route::get('spotify/playlists/{playlistId}', [\App\Http\Controllers\SpotifyImportController::class, 'showPublic'])
+        ->withoutMiddleware(\Common\Auth\Middleware\VerifyApiAccessMiddleware::class);
 });
 
 Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verified']], function() {
