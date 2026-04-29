@@ -136,25 +136,52 @@ class SpotifyService
 
         $data = $resp->json();
 
-        // paginate through tracks
-        $tracks = [];
-        $items = $data['tracks']['items'] ?? [];
-        foreach ($items as $it) {
-            $tracks[] = $it;
+        // Febrero 2026: Spotify renombró "tracks" → "items" en la respuesta de playlist.
+        // Además, dentro de cada item el campo "track" pasó a llamarse "item".
+        // Solo se devuelven canciones si el token es del dueño/colaborador de la playlist.
+        $allTracks = [];
+
+        // Soportamos tanto la API nueva (items) como la antigua (tracks) por si acaso
+        $rootKey   = isset($data['items']) ? 'items' : 'tracks';
+        $firstPage = $data[$rootKey]['items'] ?? [];
+
+        foreach ($firstPage as $entry) {
+            $allTracks[] = $this->normalizeTrackEntry($entry);
         }
 
-        $next = $data['tracks']['next'] ?? null;
+        $next = $data[$rootKey]['next'] ?? null;
         while ($next) {
             $page = Http::withToken($token)->get($next);
             if ($page->failed()) break;
             $pj = $page->json();
-            foreach ($pj['items'] ?? [] as $it) {
-                $tracks[] = $it;
+            foreach ($pj['items'] ?? [] as $entry) {
+                $allTracks[] = $this->normalizeTrackEntry($entry);
             }
             $next = $pj['next'] ?? null;
         }
 
-        $data['all_tracks'] = $tracks;
+        $data['all_tracks'] = array_filter($allTracks); // quitar nulls (tracks locales, etc.)
         return $data;
+    }
+
+    /**
+     * Normaliza una entrada de playlist al formato unificado {track, added_at}.
+     * Soporta tanto la respuesta antigua (entry.track) como la nueva (entry.item).
+     */
+    protected function normalizeTrackEntry(?array $entry): ?array
+    {
+        if (empty($entry)) return null;
+
+        // API nueva usa "item", la antigua usaba "track"
+        $trackData = $entry['item'] ?? $entry['track'] ?? null;
+
+        // Ignorar tracks locales o entradas vacías
+        if (empty($trackData['id'])) return null;
+
+        return [
+            'track'    => $trackData, // mantenemos clave "track" para no romper importPlaylist()
+            'added_at' => $entry['added_at'] ?? null,
+            'added_by' => $entry['added_by'] ?? null,
+        ];
     }
 }

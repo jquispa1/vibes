@@ -38,6 +38,8 @@ class SpotifyImportController extends BaseController
         }
 
         // Devolver solo los campos útiles (sin inflar la respuesta)
+        // Nota: desde feb 2026 Spotify renombró "tracks" → "items" en playlists
+        $itemsRoot = $data['items'] ?? $data['tracks'] ?? [];
         return $this->success([
             'playlist' => [
                 'id'          => $data['id'],
@@ -49,20 +51,20 @@ class SpotifyImportController extends BaseController
                     'id'           => $data['owner']['id'],
                     'display_name' => $data['owner']['display_name'],
                 ],
-                'tracks_total' => $data['tracks']['total'] ?? count($data['all_tracks'] ?? []),
+                'tracks_total' => $itemsRoot['total'] ?? count($data['all_tracks'] ?? []),
                 'tracks'       => collect($data['all_tracks'] ?? [])->map(function ($item) {
-                    $track = $item['track'] ?? $item;
+                    $track = $item['track'] ?? null;
                     if (empty($track['id'])) return null;
                     return [
-                        'id'         => $track['id'],
-                        'name'       => $track['name'],
-                        'duration_ms'=> $track['duration_ms'],
-                        'explicit'   => $track['explicit'],
-                        'artists'    => collect($track['artists'] ?? [])->pluck('name'),
-                        'album'      => $track['album']['name'] ?? null,
-                        'image'      => $track['album']['images'][0]['url'] ?? null,
-                        'added_at'   => $item['added_at'],
-                        'spotify_url'=> $track['external_urls']['spotify'] ?? null,
+                        'id'          => $track['id'],
+                        'name'        => $track['name'],
+                        'duration_ms' => $track['duration_ms'],
+                        'explicit'    => $track['explicit'],
+                        'artists'     => collect($track['artists'] ?? [])->pluck('name'),
+                        'album'       => $track['album']['name'] ?? null,
+                        'image'       => $track['album']['images'][0]['url'] ?? null,
+                        'added_at'    => $item['added_at'],
+                        'spotify_url' => $track['external_urls']['spotify'] ?? null,
                     ];
                 })->filter()->values(),
                 'spotify_url' => $data['external_urls']['spotify'] ?? null,
