@@ -4,11 +4,14 @@ import {useTrans} from '@ui/i18n/use-trans';
 import {useIsDarkMode} from '@ui/themes/use-is-dark-mode';
 import {CustomMenu} from '@common/menus/custom-menu';
 import {Trans} from '@ui/i18n/trans';
+import {Button} from '@ui/buttons/button';
 import {IconButton} from '@ui/buttons/icon-button';
 import {PlaylistAddIcon} from '@ui/icons/material/PlaylistAdd';
+import {UploadIcon} from '@ui/icons/material/Upload';
 import {ReactNode} from 'react';
 import {DialogTrigger} from '@ui/overlays/dialog/dialog-trigger';
 import {CreatePlaylistDialog} from '@app/web-player/playlists/crupdate-dialog/create-playlist-dialog';
+import {ImportPlaylistDialog} from '@app/spotify-import/import-playlist-dialog';
 import {useAuthUserPlaylists} from '@app/web-player/playlists/requests/use-auth-user-playlists';
 import {getPlaylistLink} from '@app/web-player/playlists/playlist-link';
 import clsx from 'clsx';
@@ -115,6 +118,18 @@ function PlaylistSection() {
           <CreatePlaylistDialog />
         </DialogTrigger>
       </div>
+      <DialogTrigger type="modal">
+        <Button
+          className="mx-12 mt-8 mb-16 w-[calc(100%-24px)] justify-start border-primary/25 bg-transparent text-primary hover:bg-primary/10"
+          startIcon={<UploadIcon />}
+          variant="outline"
+          color="primary"
+          onClickCapture={authHandler}
+        >
+          <Trans message="Import Spotify playlist" />
+        </Button>
+        <ImportPlaylistDialog />
+      </DialogTrigger>
       {data?.playlists?.map(playlist => (
         <NavLink
           to={getPlaylistLink(playlist)}
