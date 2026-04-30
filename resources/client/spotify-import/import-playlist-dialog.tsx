@@ -42,7 +42,7 @@ export function ImportPlaylistDialog() {
                 placeholder="https://open.spotify.com/playlist/..."
               />
               <p className="mt-8 text-sm text-muted">
-                <Trans message="Pega una URL de playlist pública para importarla en tu cuenta." />
+                <Trans message="Paste a public playlist URL to import it into your account." />
               </p>
             </div>
           </div>
