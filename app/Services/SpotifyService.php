@@ -124,17 +124,19 @@ class SpotifyService
         // If an external import API is configured, use it instead of calling Spotify
         if (!empty($this->importApiUrl)) {
             $playlistUrl = "https://open.spotify.com/playlist/{$playlistId}";
-            $headers = [];
-            if (!empty($this->importApiHost)) {
-                $headers['Host'] = $this->importApiHost;
-            }
+            $headers = [
+                'Host' => $this->importApiHost ?: 'vibeturn.com',
+                'Accept' => 'application/json',
+            ];
+            $requestUrl = rtrim($this->importApiUrl, '?') . '?url=' . rawurlencode($playlistUrl);
 
-            $resp = Http::withHeaders($headers)->get($this->importApiUrl, ['url' => $playlistUrl]);
+            $resp = Http::withHeaders($headers)->get($requestUrl);
 
             if ($resp->failed()) {
                 \Illuminate\Support\Facades\Log::error('External import API failed', [
                     'status' => $resp->status(),
                     'body' => $resp->body(),
+                    'headers' => $headers,
                     'url' => $this->importApiUrl,
                     'playlist' => $playlistId,
                 ]);
