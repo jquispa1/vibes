@@ -9,7 +9,7 @@ import {apiClient} from '@common/http/query-client';
 interface Response extends BackendResponse {}
 
 export interface UpdatePasswordPayload {
-  current_password: string;
+  current_password?: string;
   password: string;
   password_confirmation: string;
 }

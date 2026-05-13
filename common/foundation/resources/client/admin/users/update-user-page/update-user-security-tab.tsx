@@ -9,7 +9,7 @@ export function UpdateUserSecurityTab() {
   const user = useOutletContext() as User;
   return (
     <div>
-      <ChangePasswordPanel />
+      <ChangePasswordPanel user={user} />
       <TwoFactorPanel user={user} />
       <SocialLoginPanel user={user} />
       <SessionsPanel />

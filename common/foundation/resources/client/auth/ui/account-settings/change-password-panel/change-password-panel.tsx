@@ -7,15 +7,22 @@ import {UpdatePasswordPayload, useUpdatePassword} from './use-update-password';
 import {Button} from '@ui/buttons/button';
 import {Trans} from '@ui/i18n/trans';
 import {AccountSettingsId} from '@common/auth/ui/account-settings/account-settings-sidenav';
+import {User} from '@ui/types/user';
 
-export function ChangePasswordPanel() {
+interface Props {
+  user: User;
+}
+
+export function ChangePasswordPanel({user}: Props) {
   const form = useForm<UpdatePasswordPayload>();
   const formId = useId();
   const updatePassword = useUpdatePassword(form);
   return (
     <AccountSettingsPanel
       id={AccountSettingsId.Password}
-      title={<Trans message="Update password" />}
+      title={
+        <Trans message={user.has_password ? 'Update password' : 'Set password'} />
+      }
       actions={
         <Button
           type="submit"
@@ -24,7 +31,7 @@ export function ChangePasswordPanel() {
           color="primary"
           disabled={!form.formState.isValid || updatePassword.isPending}
         >
-          <Trans message="Update password" />
+          <Trans message={user.has_password ? 'Update password' : 'Set password'} />
         </Button>
       }
     >
@@ -39,14 +46,16 @@ export function ChangePasswordPanel() {
           });
         }}
       >
-        <FormTextField
-          className="mb-24"
-          name="current_password"
-          label={<Trans message="Current password" />}
-          type="password"
-          autoComplete="current-password"
-          required
-        />
+        {user.has_password ? (
+          <FormTextField
+            className="mb-24"
+            name="current_password"
+            label={<Trans message="Current password" />}
+            type="password"
+            autoComplete="current-password"
+            required
+          />
+        ) : null}
         <FormTextField
           className="mb-24"
           name="password"

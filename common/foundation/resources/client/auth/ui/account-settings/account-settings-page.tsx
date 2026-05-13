@@ -52,7 +52,7 @@ export function AccountSettingsPage() {
                 ))}
                 <BasicInfoPanel user={data.user} />
                 <SocialLoginPanel user={data.user} />
-                <ChangePasswordPanel />
+                <ChangePasswordPanel user={data.user} />
                 <TwoFactorPanel user={data.user} />
                 <SessionsPanel />
                 <LocalizationPanel user={data.user} />
