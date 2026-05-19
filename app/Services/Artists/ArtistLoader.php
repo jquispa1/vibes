@@ -3,6 +3,7 @@
 namespace App\Services\Artists;
 
 use App\Models\Artist;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
 
 class ArtistLoader
@@ -48,7 +49,11 @@ class ArtistLoader
             }
             if ($tabIds->contains(static::$artistPageTabs['discography'])) {
                 $response = $this->loadArtistPageAlbums($response);
-                $response['artist']->load(['topTracks']);
+                try {
+                    $response['artist']->load(['topTracks']);
+                } catch (QueryException $exception) {
+                    $response['artist']->setRelation('topTracks', collect());
+                }
             }
         } elseif ($loader === 'editArtistPage') {
             $artist->setHidden([]);
