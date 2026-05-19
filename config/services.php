@@ -38,5 +38,6 @@ return [
         'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
         'import_api_url' => env('SPOTIFY_IMPORT_API_URL'),
         'import_api_host' => env('SPOTIFY_IMPORT_API_HOST', 'vibeturn.com'),
+        'import_api_key' => env('SPOTIFY_IMPORT_API_KEY'),
     ],
 ];

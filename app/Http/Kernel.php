@@ -72,5 +72,6 @@ class Kernel extends HttpKernel
         'verified' => EnsureEmailIsVerified::class,
         'prerenderIfCrawler' => PrerenderIfCrawler::class,
         'optionalAuth' => OptionalAuthenticate::class,
+        'spotify.import' => \App\Http\Middleware\AllowSpotifyImportHost::class,
     ];
 }

@@ -1,6 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import {apiClient} from '@common/http/query-client';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
+import {PaginatedBackendResponse} from '@common/http/backend-response/pagination-response';
 import {BlogCategory} from '@app/blog/blog-category';
 
 export interface BlogAuthor {
@@ -25,14 +26,9 @@ export interface BlogPost {
   categories?: BlogCategory[];
 }
 
-export interface BlogPostsResponse extends BackendResponse {
-  pagination: {
-    data: BlogPost[];
-    current_page: number;
-    last_page: number;
-    total: number;
-  };
-}
+export interface BlogPostsResponse
+  extends BackendResponse,
+    PaginatedBackendResponse<BlogPost> {}
 
 interface BlogPostsParams {
   category?: string;
