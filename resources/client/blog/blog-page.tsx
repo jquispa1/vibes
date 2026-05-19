@@ -1,12 +1,18 @@
-import {Link} from 'react-router';
+import {Link, useSearchParams} from 'react-router';
 import {PageStatus} from '@common/http/page-status';
 import {useBlogPosts, BlogPost} from './requests/use-blog-posts';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {Footer} from '@common/ui/footer/footer';
 import {PageMetaTags} from '@common/http/page-meta-tags';
+import {PaginationControls} from '@common/ui/navigation/pagination-controls';
+import {PaginationResponse} from '@common/http/backend-response/pagination-response';
 
 export function BlogPage() {
-  const query = useBlogPosts();
+  const [searchParams] = useSearchParams();
+  const pageParam = searchParams.get('page');
+  const pageNumber = pageParam ? Number(pageParam) : undefined;
+  const page = Number.isFinite(pageNumber) && pageNumber! > 0 ? pageNumber : undefined;
+  const query = useBlogPosts({page});
 
   return (
     <div className="flex min-h-screen flex-col bg">
@@ -19,7 +25,10 @@ export function BlogPage() {
         {!query.data ? (
           <PageStatus query={query} loaderClassName="mt-80" />
         ) : (
-          <BlogPageContent posts={query.data.pagination.data} />
+          <BlogPageContent
+            posts={query.data.pagination.data}
+            pagination={query.data.pagination}
+          />
         )}
       </div>
       <Footer className="mx-14 md:mx-40" />
@@ -29,10 +38,12 @@ export function BlogPage() {
 
 export function BlogPageContent({
   posts,
+  pagination,
   title = 'Blog',
   subtitle = 'Novedades, guías y artículos sobre la plataforma.',
 }: {
   posts: BlogPost[];
+  pagination?: PaginationResponse<BlogPost>;
   title?: string;
   subtitle?: string;
 }) {
@@ -127,6 +138,12 @@ export function BlogPageContent({
             ))}
           </div>
         )}
+
+        <PaginationControls
+          pagination={pagination}
+          className="mt-48"
+          scrollToTop
+        />
       </div>
     </div>
   );

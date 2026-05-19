@@ -36,6 +36,7 @@ export interface BlogPostsResponse extends BackendResponse {
 
 interface BlogPostsParams {
   category?: string;
+  page?: number | string;
 }
 
 export function useBlogPosts(params?: BlogPostsParams) {

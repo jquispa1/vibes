@@ -1,4 +1,4 @@
-import {useParams} from 'react-router';
+import {useParams, useSearchParams} from 'react-router';
 import {PageStatus} from '@common/http/page-status';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {Footer} from '@common/ui/footer/footer';
@@ -9,8 +9,12 @@ import {BlogPageContent} from './blog-page';
 
 export function BlogCategoryPage() {
   const {slug = ''} = useParams();
+  const [searchParams] = useSearchParams();
+  const pageParam = searchParams.get('page');
+  const pageNumber = pageParam ? Number(pageParam) : undefined;
+  const page = Number.isFinite(pageNumber) && pageNumber! > 0 ? pageNumber : undefined;
   const categoryQuery = useBlogCategory(slug);
-  const postsQuery = useBlogPosts({category: slug});
+  const postsQuery = useBlogPosts({category: slug, page});
 
   return (
     <div className="flex min-h-screen flex-col bg">
@@ -27,6 +31,7 @@ export function BlogCategoryPage() {
             title={categoryQuery.data.blogCategory.name}
             subtitle={`Posts en la categoría ${categoryQuery.data.blogCategory.name}`}
             posts={postsQuery.data.pagination.data}
+            pagination={postsQuery.data.pagination}
           />
         )}
       </div>
