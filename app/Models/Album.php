@@ -128,7 +128,7 @@ class Album extends BaseModel
             return true;
         }
 
-        if (!$this->tracks()->exists()) {
+        if (!$this->tracks()->reorder()->exists()) {
             return true;
         }
 
