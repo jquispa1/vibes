@@ -4,6 +4,7 @@ namespace App\Services\Albums;
 
 use App\Models\Album;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\QueryException;
 
 class LoadAlbum
 {
@@ -44,13 +45,17 @@ class LoadAlbum
 
     protected function loadFullTracks(array $data): array
     {
-        $data['album']->load([
-            'tracks' => fn(HasMany $builder) => $builder->with([
-                'artists',
-                'tags',
-                'genres',
-            ]),
-        ]);
+        try {
+            $data['album']->load([
+                'tracks' => fn(HasMany $builder) => $builder->with([
+                    'artists',
+                    'tags',
+                    'genres',
+                ]),
+            ]);
+        } catch (QueryException $exception) {
+            $data['album']->setRelation('tracks', collect());
+        }
         return $data;
     }
 }

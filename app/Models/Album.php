@@ -127,7 +127,8 @@ class Album extends BaseModel
         if (!$this->fully_scraped) {
             return true;
         }
-        if (!$this->tracks || $this->tracks->isEmpty()) {
+
+        if (!$this->tracks()->exists()) {
             return true;
         }
 

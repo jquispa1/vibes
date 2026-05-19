@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Str;
 
 class BlogPost extends BaseModel
 {
@@ -49,6 +50,15 @@ class BlogPost extends BaseModel
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function getFeaturedImageAttribute($value)
+    {
+        if (!$value || Str::startsWith($value, ['http://', 'https://', '//'])) {
+            return $value;
+        }
+
+        return url($value);
     }
 
     public function toNormalizedArray(): array
