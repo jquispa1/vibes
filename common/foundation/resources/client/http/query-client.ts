@@ -8,7 +8,7 @@ import {getEchoSocketId} from '@common/http/get-echo-socket-id';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30000,
+      staleTime: 0,
       retry: (failureCount, err) => {
         return (
           !errorStatusIs(err, 401) &&

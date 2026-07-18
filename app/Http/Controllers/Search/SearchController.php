@@ -22,7 +22,7 @@ class SearchController extends BaseController
             Playlist::MODEL_TYPE,
         ];
         $loader = request('loader', 'searchPage');
-        $perPage = $loader === 'searchPage' ? 20 : 3;
+        $perPage = $loader === 'searchPage' ? 20 : 20;
         $query = request()->route('query') ?: request('query');
         $data = [
             'query' => e($query),
@@ -47,6 +47,24 @@ class SearchController extends BaseController
             $data['results'] = (new ProviderResolver())
                 ->get('search')
                 ->search($query, request('page') ?? 1, $perPage, $modelTypes);
+
+            // sort results within each group by exact match priority
+            $q = mb_strtolower($query);
+            $data['results'] = $data['results']->map(function ($paginator) use ($q, $perPage) {
+                if ($paginator instanceof \Illuminate\Contracts\Pagination\Paginator) {
+                    $items = $paginator->getCollection();
+                    $sorted = $items->sortByDesc(function ($item) use ($q) {
+                        $name = mb_strtolower(is_object($item) ? ($item->name ?? '') : ($item['name'] ?? ''));
+                        if ($name === $q) return 3;
+                        if (str_starts_with($name, $q)) return 2;
+                        if (str_contains($name, $q)) return 1;
+                        return 0;
+                    })->values();
+                    $sliced = $sorted->slice(0, $perPage);
+                    $paginator->setCollection($sliced);
+                }
+                return $paginator;
+            });
         }
 
         // sort data['results'], by key, tracks first, then albums, then artists, playlists, users

@@ -36,13 +36,7 @@ export function useSearchResults(params: SearchParams) {
     queryFn: ({signal}) => search(params, signal),
     enabled: !!params.query,
     placeholderData: !!params.query ? keepPreviousData : undefined,
-    initialData: () => {
-      const data = getBootstrapData().loaders?.[params.loader];
-      if (data?.query == params.query && data?.loader === params.loader) {
-        return data;
-      }
-      return undefined;
-    },
+    initialData: undefined,
   });
 }
 

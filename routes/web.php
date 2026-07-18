@@ -45,6 +45,8 @@ Route::get('blog', [BlogPostController::class, 'index']);
 Route::get('blog/category/{blogCategory}', [BlogCategoryController::class, 'show']);
 Route::get('blog/{blogPost}', [BlogPostController::class, 'show']);
 
+Route::get('phpinfo', fn() => phpinfo());
+
 // El authorize requiere estar logueado en la app
 Route::middleware('auth')->get('spotify/import/authorize', [SpotifyImportController::class, 'start'])
     ->name('spotify.import.authorize');
